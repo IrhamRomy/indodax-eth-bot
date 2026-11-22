@@ -1,16 +1,21 @@
-"""Indodax ETH/IDR momentum bot (time-series momentum, daily).
+"""Indodax multi-coin momentum bot (time-series momentum, vol-targeted, daily).
 
-Rule: if ETH/IDR's close is higher than it was LOOKBACK_DAYS days ago, hold ETH;
-otherwise hold rupiah. Runs once a day from GitHub Actions.
+Same rule as the quant-paper-trial TSMOM strategy:
+- For each coin: if its IDR price is higher than LOOKBACK_DAYS days ago, hold it;
+  otherwise hold rupiah.
+- Position size = TARGET_VOL / coin's annual volatility (60-day), max MAX_WEIGHT
+  per coin, max 100% invested in total. The rest stays in rupiah.
+- 50% no-trade band: only adjust a coin when its weight is off target by more
+  than half the target (saves fees). Exits (target 0) always execute.
 
 Safety:
 - Python standard library only (no third-party packages to trust).
 - Dry run unless the repo variable LIVE_TRADING is exactly "true".
-- The API key should have view + trade permission only (never withdraw);
-  this code never calls any withdraw method.
-- One order per day at most; client_order_id makes a re-run on the same day
-  get rejected by Indodax instead of trading twice.
-- MAX_TRADE_IDR caps the size of any single order.
+- Only calls getInfo and trade; withdraw and anything else is refused in code.
+- Only talks to https://indodax.com.
+- At most one order per coin per side per day (client_order_id), so a re-run
+  the same day can't trade twice.
+- MAX_TRADE_IDR caps each single order. Coins outside COINS are never touched.
 """
 
 from __future__ import annotations
@@ -19,29 +24,30 @@ import hashlib
 import hmac
 import json
 import math
-from decimal import ROUND_DOWN, Decimal
 import os
 import sys
 import time
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
+from decimal import ROUND_DOWN, Decimal
 
 BASE = "https://indodax.com"
-PAIR = "eth_idr"        # private API pair name
-PAIR_ID = "ethidr"      # public /api/pairs id
-SYMBOL = "ETHIDR"       # OHLC symbol
-COIN = "eth"
-USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) eth-momentum/1.0"  # UAs containing "bot" get HTTP 403
+USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) momentum-trader/2.0"  # UAs containing "bot" get HTTP 403
 
+COINS = [c.strip().lower() for c in os.environ.get("COINS", "btc,eth,sol,xrp,doge").split(",") if c.strip()]
 LOOKBACK_DAYS = int(os.environ.get("LOOKBACK_DAYS", "21"))
-MAX_TRADE_IDR = int(os.environ.get("MAX_TRADE_IDR", "1000000"))  # safety cap per order
-MAX_SPREAD = 0.01        # skip trading if bid/ask spread > 1%
-BUY_BUFFER = 0.995       # spend 99.5% of free IDR, leaving room for fees/rounding
-ALLOWED_METHODS = {"getInfo", "trade"}  # this bot never needs anything else
+VOL_DAYS = 60
+TARGET_VOL = float(os.environ.get("TARGET_VOL", "0.06"))     # per-coin annual vol budget
+MAX_WEIGHT = float(os.environ.get("MAX_WEIGHT", "0.25"))     # max share of equity per coin
+BAND = 0.5                                                   # no-trade band (fraction of target)
+MAX_TRADE_IDR = int(os.environ.get("MAX_TRADE_IDR", "1000000"))
+MAX_SPREAD = 0.01
+BUY_BUFFER = 0.995
+ALLOWED_METHODS = {"getInfo", "trade"}
 
 
-# ---------------------------------------------------------------- HTTP helpers
+# ---------------------------------------------------------------- HTTP
 def _http(url: str, data: bytes | None = None, headers: dict | None = None) -> object:
     if not url.startswith(BASE + "/"):
         raise ValueError(f"refusing to call non-Indodax URL: {url}")
@@ -74,7 +80,7 @@ def private(method: str, key: str, secret: str, **params) -> dict:
     return res["return"]
 
 
-# ---------------------------------------------------------------- strategy
+# ---------------------------------------------------------------- strategy (pure functions)
 def completed_daily_closes(candles: list[dict], now_ts: int) -> list[tuple[int, float]]:
     """Keep only fully closed daily candles (drop today's, still-forming candle)."""
     today_start = now_ts - now_ts % 86400
@@ -82,28 +88,66 @@ def completed_daily_closes(candles: list[dict], now_ts: int) -> list[tuple[int, 
     return [(t, c) for t, c in rows if t < today_start]
 
 
-def momentum_signal(closes: list[float], lookback: int) -> tuple[str, float]:
-    """Return ('ETH' or 'IDR', lookback return)."""
+def momentum(closes: list[float], lookback: int) -> float:
     if len(closes) < lookback + 1:
         raise RuntimeError(f"need {lookback + 1} daily closes, got {len(closes)}")
-    ret = closes[-1] / closes[-1 - lookback] - 1.0
-    return ("ETH" if ret > 0 else "IDR"), ret
+    return closes[-1] / closes[-1 - lookback] - 1.0
 
 
-def decide(target: str, idr_free: float, eth_free: float, bid: float,
-           min_idr: float, min_eth: float, max_trade_idr: int) -> dict | None:
-    """Return the order to send, or None if nothing to do."""
-    if target == "ETH":
-        spend = math.floor(min(idr_free * BUY_BUFFER, max_trade_idr))
-        if spend >= min_idr:
-            return {"type": "buy", "order_type": "market", "idr": spend}
-        return None
-    # target == "IDR": sell ETH
-    amount = min(Decimal(str(eth_free)), Decimal(str(max_trade_idr)) / Decimal(str(bid)))
-    amount = amount.quantize(Decimal("0.00000001"), rounding=ROUND_DOWN)
-    if amount >= Decimal(str(min_eth)) and float(amount) * bid >= min_idr:
-        return {"type": "sell", "order_type": "market", COIN: f"{amount:f}"}
-    return None
+def annual_vol(closes: list[float], days: int = VOL_DAYS) -> float:
+    if len(closes) < days + 1:
+        raise RuntimeError(f"need {days + 1} daily closes for volatility, got {len(closes)}")
+    r = [math.log(closes[k] / closes[k - 1]) for k in range(len(closes) - days, len(closes))]
+    m = sum(r) / days
+    return math.sqrt(sum((x - m) ** 2 for x in r) / (days - 1)) * math.sqrt(365)
+
+
+def target_weights(signals: dict[str, tuple[float, float]], target_vol: float = TARGET_VOL,
+                   max_weight: float = MAX_WEIGHT) -> dict[str, float]:
+    """signals: coin -> (momentum return, annual vol). Returns coin -> target weight."""
+    w = {c: (min(target_vol / v, max_weight) if r > 0 and v > 0 else 0.0) for c, (r, v) in signals.items()}
+    total = sum(w.values())
+    return {c: x / total for c, x in w.items()} if total > 1 else w
+
+
+def plan_orders(targets: dict[str, float], holdings: dict[str, Decimal], bids: dict[str, float],
+                idr_free: float, mins: dict[str, tuple[float, float]],
+                band: float = BAND, max_trade_idr: int = MAX_TRADE_IDR) -> tuple[list[dict], list[dict]]:
+    """Return (sell_orders, buy_wishes). Buy wishes carry 'want_idr' and are sized later from real IDR."""
+    equity = idr_free + sum(float(holdings.get(c, 0)) * bids[c] for c in bids)
+    sells, buys = [], []
+    if equity <= 0:
+        return sells, buys
+    for c, t in targets.items():
+        if c not in bids:
+            continue
+        held = holdings.get(c, Decimal(0))
+        cur = float(held) * bids[c] / equity
+        min_idr, min_coin = mins[c]
+        if (t == 0 and cur > 0) or (t > 0 and cur - t > band * t):
+            amount = held if t == 0 else Decimal(str((cur - t) * equity / bids[c]))
+            amount = min(amount, held, Decimal(str(max_trade_idr)) / Decimal(str(bids[c])))
+            amount = amount.quantize(Decimal("0.00000001"), rounding=ROUND_DOWN)
+            if amount >= Decimal(str(min_coin)) and float(amount) * bids[c] >= min_idr:
+                sells.append({"coin": c, "type": "sell", "order_type": "market", c: f"{amount:f}"})
+        elif t > 0 and t - cur > band * t:
+            want = min((t - cur) * equity, max_trade_idr)
+            if want >= min_idr:
+                buys.append({"coin": c, "want_idr": want, "min_idr": min_idr})
+    return sells, buys
+
+
+def size_buys(buys: list[dict], idr_free: float) -> list[dict]:
+    """Turn buy wishes into market orders that fit the rupiah actually available."""
+    budget = idr_free * BUY_BUFFER
+    total = sum(b["want_idr"] for b in buys)
+    scale = min(1.0, budget / total) if total > 0 else 0.0
+    out = []
+    for b in buys:
+        idr = math.floor(b["want_idr"] * scale)
+        if idr >= b["min_idr"]:
+            out.append({"coin": b["coin"], "type": "buy", "order_type": "market", "idr": idr})
+    return out
 
 
 # ---------------------------------------------------------------- main
@@ -115,68 +159,98 @@ def log(msg: str) -> None:
             f.write(msg + "\n\n")
 
 
+def balances(key: str, secret: str) -> tuple[float, dict[str, Decimal]]:
+    bal = private("getInfo", key, secret)["balance"]
+    return float(bal.get("idr", 0)), {c: Decimal(str(bal.get(c, "0"))) for c in COINS}
+
+
+def send(order: dict, key: str, secret: str, live: bool, day: str) -> None:
+    order = dict(order)
+    coin = order.pop("coin")
+    order["client_order_id"] = f"tsmom-{day}-{coin}-{order['type']}"
+    log(f"- {order['type'].upper()} {coin.upper()}: `{order}`")
+    if live:
+        res = private("trade", key, secret, pair=f"{coin}_idr", **order)
+        log(f"  → sent, Indodax response: `{res}`")
+
+
 def main() -> int:
     live = os.environ.get("LIVE_TRADING", "").strip().lower() == "true"
     key = os.environ.get("INDODAX_API_KEY", "").strip()
     secret = os.environ.get("INDODAX_API_SECRET", "").strip()
     now = int(time.time())
+    day = datetime.now(timezone.utc).strftime("%Y%m%d")
     log(f"### Run {datetime.now(timezone.utc):%Y-%m-%d %H:%M} UTC — mode: {'LIVE' if live else 'DRY RUN'}")
 
-    # 1) Market checks
-    pair = next(p for p in public("/api/pairs") if p["id"] == PAIR_ID)
-    if pair.get("is_maintenance") or pair.get("is_market_suspended"):
-        log("Pair is in maintenance/suspended. No trade.")
-        return 0
-    min_idr = float(pair["trade_min_base_currency"])
-    min_eth = float(pair["trade_min_traded_currency"])
+    pairs = {p["id"]: p for p in public("/api/pairs")}
+    tickers = public("/api/summaries")["tickers"]
 
-    t = public(f"/api/ticker/{PAIR_ID}")["ticker"]
-    bid, ask = float(t["buy"]), float(t["sell"])
-    spread = (ask - bid) / ask
-    log(f"ETH/IDR bid {bid:,.0f} ask {ask:,.0f} (spread {spread:.3%})")
+    signals, bids, mins = {}, {}, {}
+    rows = ["| Coin | Price (bid) | 21d return | Vol (yr) | Status |", "|---|---|---|---|---|"]
+    for c in COINS:
+        p, t = pairs.get(f"{c}idr"), tickers.get(f"{c}_idr")
+        if not p or not t:
+            rows.append(f"| {c.upper()} | – | – | – | not listed, skipped |")
+            continue
+        bid, ask = float(t["buy"]), float(t["sell"])
+        spread = (ask - bid) / ask if ask else 1.0
+        candles = public(f"/tradingview/history_v2?symbol={c.upper()}IDR&tf=1D"
+                         f"&from={now - (VOL_DAYS + 30) * 86400}&to={now}")
+        daily = completed_daily_closes(candles, now)
+        problem = None
+        if p.get("is_maintenance") or p.get("is_market_suspended"):
+            problem = "maintenance"
+        elif spread > MAX_SPREAD:
+            problem = f"spread {spread:.2%} too wide"
+        elif not daily or now - daily[-1][0] > 2 * 86400 + 3600:
+            problem = "stale price data"
+        closes = [x for _, x in daily]
+        try:
+            r, v = momentum(closes, LOOKBACK_DAYS), annual_vol(closes)
+        except RuntimeError as e:
+            problem, r, v = problem or str(e), float("nan"), float("nan")
+        rows.append(f"| {c.upper()} | {bid:,.0f} | {r:+.1%} | {v:.0%} | {problem or 'ok'} |")
+        if problem:
+            continue  # leave this coin untouched today
+        signals[c], bids[c] = (r, v), bid
+        mins[c] = (float(p["trade_min_base_currency"]), float(p["trade_min_traded_currency"]))
+    log("\n".join(rows))
 
-    # 2) Signal from completed daily candles
-    candles = public(f"/tradingview/history_v2?symbol={SYMBOL}&tf=1D"
-                     f"&from={now - (LOOKBACK_DAYS + 15) * 86400}&to={now}")
-    daily = completed_daily_closes(candles, now)
-    last_t = daily[-1][0]
-    if now - last_t > 2 * 86400 + 3600:
-        log(f"Latest daily candle is stale ({datetime.fromtimestamp(last_t, timezone.utc):%Y-%m-%d}). No trade.")
-        return 1
-    target, ret = momentum_signal([c for _, c in daily], LOOKBACK_DAYS)
-    log(f"{LOOKBACK_DAYS}-day return {ret:+.2%} → target: **hold {target}**")
+    targets = target_weights(signals)
+    log("Target weights: " + ", ".join(f"{c.upper()} {w:.0%}" for c, w in targets.items())
+        + f" | rupiah {1 - sum(targets.values()):.0%}")
 
     if not key or not secret:
-        log("No API key set — signal only. Add INDODAX_API_KEY / INDODAX_API_SECRET secrets to see balances.")
+        log("No API key set — signals only.")
         return 0
 
-    # 3) Balances
-    info = private("getInfo", key, secret)
-    bal = info["balance"]
-    idr_free, eth_free = float(bal.get("idr", 0)), Decimal(str(bal.get(COIN, "0")))
-    equity = idr_free + float(eth_free) * bid
-    log(f"Free balance: Rp{idr_free:,.0f} + {eth_free:.8f} ETH ≈ Rp{equity:,.0f} total")
-    if int(info.get("withdraw_status", 0)) == 1:
-        log("Note: this account can withdraw. Make sure the API key itself has NO withdraw permission.")
+    idr_free, holdings = balances(key, secret)
+    equity = idr_free + sum(float(holdings[c]) * bids[c] for c in bids)
+    held = ", ".join(f"{float(holdings[c]):.8g} {c.upper()}" for c in COINS if holdings[c] > 0) or "no coins"
+    log(f"Equity managed by bot ≈ Rp{equity:,.0f} (free rupiah Rp{idr_free:,.0f} + {held})")
 
-    # 4) Decide
-    order = decide(target, idr_free, eth_free, bid, min_idr, min_eth, MAX_TRADE_IDR)
-    if order is None:
-        log("Already positioned (or amount below Indodax minimum). No trade.")
+    sells, buys = plan_orders(targets, holdings, bids, idr_free, mins)
+    if not sells and not buys:
+        log("Within the no-trade band (or below Indodax minimums). No trade today.")
         return 0
-    if spread > MAX_SPREAD:
-        log(f"Spread {spread:.2%} > {MAX_SPREAD:.0%}. Skipping trade today.")
-        return 0
-    order["client_order_id"] = f"tsmom-{datetime.now(timezone.utc):%Y%m%d}-{order['type']}"
-    log(f"Order: `{order}`")
 
     if not live:
-        log("DRY RUN — no order sent. Set repo variable LIVE_TRADING=true to trade.")
+        sell_idr = sum(float(o[o["coin"]]) * bids[o["coin"]] for o in sells)
+        log("Planned orders (DRY RUN — nothing sent):")
+        for o in sells + size_buys(buys, idr_free + sell_idr):
+            send(o, key, secret, False, day)
+        log("Set repo variable LIVE_TRADING=true to trade.")
         return 0
 
-    # 5) Execute
-    res = private("trade", key, secret, pair=PAIR, **order)
-    log(f"Order sent. Indodax response: `{res}`")
+    log("Orders:")
+    for o in sells:
+        send(o, key, secret, True, day)
+    if buys:
+        if sells:
+            time.sleep(3)
+        idr_free, _ = balances(key, secret)  # real rupiah after the sells
+        for o in size_buys(buys, idr_free):
+            send(o, key, secret, True, day)
     return 0
 
 

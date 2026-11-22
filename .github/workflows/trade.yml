@@ -26,6 +26,7 @@ jobs:
         env:
           LIVE_TRADING: ${{ vars.LIVE_TRADING }}
           MAX_TRADE_IDR: ${{ vars.MAX_TRADE_IDR || '1000000' }}
+          COINS: ${{ vars.COINS || 'btc,eth,sol,xrp,doge' }}
           INDODAX_API_KEY: ${{ secrets.INDODAX_API_KEY }}
           INDODAX_API_SECRET: ${{ secrets.INDODAX_API_SECRET }}
         run: python3 -I bot.py
