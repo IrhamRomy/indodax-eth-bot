@@ -16,7 +16,7 @@ flatters memes.
 | Majors-5 + Donchian 20/10 | +16.1% | 1.06 | −17% | 1.53 | 0.08 | 0.64 |
 | Auto top-5 majors + TSMOM 21d | +8.5% | 0.55 | −24% | 0.88 | −0.10 | 0.22 |
 | Majors-5 + meme sleeve (best signal, SMA50) | +15.7% | 0.72 | −38% | 1.33 | −0.03 | 0.35 |
-| Memes only (best signal) | −2.5% | −0.09 | −30% | | ≤ −0.41 | ≤ 0.01 |
+| Memes only (range over the 5 signals) | −2.5% … −6.2% | −0.38 … −0.09 | −30% … −48% | | −0.41 … −0.91 | ≤ 0.01 |
 | Majors-5 buy & hold (equal weight) | +0.8% | 0.32 | −70% | | −0.39 | |
 | Memes buy & hold (equal weight) | −20.2% | 0.04 | −85% | | −0.17 | |
 All 25 combinations are in the JSON (5 universes × TSMOM 21d, TSMOM 63d, SMA50, SMA20>SMA100, Donchian).
