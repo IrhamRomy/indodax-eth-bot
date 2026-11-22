@@ -1,0 +1,98 @@
+{
+  "H1_indodax_2018_2021": {
+    "D1": {
+      "CAGR": 0.3252,
+      "sharpe": 1.777,
+      "max_dd": -0.179,
+      "turnover_per_year": 10.8,
+      "by_year": {
+        "2018": -0.0782,
+        "2019": 0.0396,
+        "2020": 0.88,
+        "2021": 0.4898
+      }
+    },
+    "D1_REGIME": {
+      "CAGR": 0.2688,
+      "sharpe": 1.657,
+      "max_dd": -0.1588,
+      "turnover_per_year": 7.7,
+      "by_year": {
+        "2018": -0.0043,
+        "2019": -0.0044,
+        "2020": 0.6666,
+        "2021": 0.3948
+      }
+    },
+    "share_days_bull": 0.57
+  },
+  "H2_binance_2018_2021": {
+    "D1": {
+      "CAGR": 0.6288,
+      "sharpe": 2.041,
+      "max_dd": -0.2333,
+      "turnover_per_year": 15.2,
+      "by_year": {
+        "2018": -0.1514,
+        "2019": 0.0981,
+        "2020": 1.1287,
+        "2021": 1.7898
+      }
+    },
+    "D1_REGIME": {
+      "CAGR": 0.4836,
+      "sharpe": 1.838,
+      "max_dd": -0.1988,
+      "turnover_per_year": 11.1,
+      "by_year": {
+        "2018": 0.0,
+        "2019": -0.0534,
+        "2020": 0.6992,
+        "2021": 1.4794
+      }
+    },
+    "share_days_bull": 0.572
+  },
+  "context_indodax_2022_2026": {
+    "D1": {
+      "CAGR": 0.1568,
+      "sharpe": 0.884,
+      "max_dd": -0.2181,
+      "turnover_per_year": 17.6,
+      "by_year": {
+        "2022": -0.1174,
+        "2023": 0.4552,
+        "2024": 0.6116,
+        "2025": 0.0006,
+        "2026": -0.0155
+      }
+    },
+    "D1_REGIME": {
+      "CAGR": 0.1694,
+      "sharpe": 1.054,
+      "max_dd": -0.1801,
+      "turnover_per_year": 12.1,
+      "by_year": {
+        "2022": 0.0,
+        "2023": 0.2517,
+        "2024": 0.6016,
+        "2025": 0.0628,
+        "2026": 0.0092
+      }
+    },
+    "share_days_bull": 0.549
+  },
+  "checks": {
+    "H1_indodax_2018_2021": {
+      "Sharpe >= D1 + 0.05": false,
+      "MaxDD not worse than D1": true,
+      "CAGR >= D1 - 2pp": false
+    },
+    "H2_binance_2018_2021": {
+      "Sharpe >= D1 + 0.05": false,
+      "MaxDD not worse than D1": true,
+      "CAGR >= D1 - 2pp": false
+    }
+  },
+  "pass": false
+}
