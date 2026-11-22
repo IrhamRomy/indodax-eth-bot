@@ -2,7 +2,7 @@ name: daily-trade
 
 on:
   schedule:
-    - cron: "7 4 * * *"   # 04:07 UTC = 11:07 WIB, once a day
+    - cron: "7 4 * * *"   # 04:07 UTC = 11:07 WIB, once a day (just after the ML decision bar closes)
   workflow_dispatch: {}     # "Run workflow" button for manual tests
 
 permissions:
@@ -14,19 +14,31 @@ concurrency:
 
 jobs:
   trade:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements-ml.txt
+      # ML sleeve dependencies: wheels only, every file hash-checked (no install scripts can run).
+      # If this fails, the bot still runs; in shadow mode TSMOM trades as usual, and with
+      # ML_WEIGHT > 0 the bot places no trades that day.
+      - name: Install ML dependencies (hash-pinned)
+        continue-on-error: true
+        run: python -m pip install --require-hashes --only-binary=:all: --no-deps -r requirements-ml.txt
       - name: Unit tests
-        run: python3 -I -m unittest discover -s tests -v
+        run: python -I -m unittest discover -s tests -v
       - name: Run bot
         env:
           LIVE_TRADING: ${{ vars.LIVE_TRADING }}
+          ML_WEIGHT: ${{ vars.ML_WEIGHT || '0' }}
           MAX_TRADE_IDR: ${{ vars.MAX_TRADE_IDR || '1000000' }}
           COINS: ${{ vars.COINS || 'btc,eth,sol,xrp,doge' }}
           INDODAX_API_KEY: ${{ secrets.INDODAX_API_KEY }}
           INDODAX_API_SECRET: ${{ secrets.INDODAX_API_SECRET }}
-        run: python3 -I bot.py
+        run: python -I bot.py

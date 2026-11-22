@@ -16,6 +16,13 @@ Safety:
 - At most one order per coin per side per day (client_order_id), so a re-run
   the same day can't trade twice.
 - MAX_TRADE_IDR caps each single order. Coins outside COINS are never touched.
+
+ML sleeve (ml/shadow.py, the LightGBM model from quant-paper-trial):
+- ML_WEIGHT = 0 (default): shadow mode. The ML signal is computed and logged with the
+  orders it *would* place (ML alone and a 50:50 blend), but only TSMOM trades.
+  If the ML part fails, it is logged and TSMOM trades normally.
+- ML_WEIGHT > 0: final target per coin = (1 - ML_WEIGHT) * TSMOM + ML_WEIGHT * ML.
+  If the ML part fails, NO trades are placed that day.
 """
 
 from __future__ import annotations
@@ -42,6 +49,9 @@ TARGET_VOL = float(os.environ.get("TARGET_VOL", "0.06"))     # per-coin annual v
 MAX_WEIGHT = float(os.environ.get("MAX_WEIGHT", "0.25"))     # max share of equity per coin
 BAND = 0.5                                                   # no-trade band (fraction of target)
 MAX_TRADE_IDR = int(os.environ.get("MAX_TRADE_IDR", "1000000"))
+ML_WEIGHT = float(os.environ.get("ML_WEIGHT", "0") or 0)  # 0 = ML in shadow mode (logged, never traded)
+if not 0.0 <= ML_WEIGHT <= 1.0:
+    raise SystemExit(f"ML_WEIGHT must be between 0 and 1, got {ML_WEIGHT}")
 MAX_SPREAD = 0.01
 BUY_BUFFER = 0.995
 ALLOWED_METHODS = {"getInfo", "trade"}
@@ -174,6 +184,45 @@ def send(order: dict, key: str, secret: str, live: bool, day: str) -> None:
         log(f"  → sent, Indodax response: `{res}`")
 
 
+def blend(a: dict[str, float], b: dict[str, float], wb: float) -> dict[str, float]:
+    """(1 - wb) * a + wb * b, per coin."""
+    return {c: (1 - wb) * a.get(c, 0.0) + wb * b.get(c, 0.0) for c in set(a) | set(b)}
+
+
+def fmt_weights(t: dict[str, float]) -> str:
+    return ", ".join(f"{c.upper()} {t.get(c, 0.0):.0%}" for c in COINS) + f" | rupiah {1 - sum(t.values()):.0%}"
+
+
+def ml_part(coins: list[str]) -> tuple[dict[str, float] | None, str]:
+    """Run the ML sleeve. Returns (targets or None, markdown log)."""
+    try:
+        here = os.path.dirname(os.path.abspath(__file__))
+        if here not in sys.path:  # python -I leaves the script folder off sys.path
+            sys.path.insert(0, here)
+        from ml.shadow import ml_targets  # heavy deps (lightgbm/pandas) only loaded here
+        r = ml_targets(coins)
+    except Exception as e:
+        return None, f"ML signal unavailable: {type(e).__name__}: {e}"
+    d = r["detail"]
+    rows = [f"ML decision bar {d['decision_bar']:%Y-%m-%d %H:%M} UTC (Binance 4h data)",
+            "", "| Coin | P(up) | ML says | ML weight |", "|---|---|---|---|"]
+    for s in sorted(d["prob"]):
+        c = s.replace("USDT", "").lower()
+        note = "" if c in coins else " (not in bot coin list → stays rupiah)"
+        rows.append(f"| {c.upper()} | {d['prob'][s]:.3f} | {'long' if d['on'][s] else 'flat'} | "
+                    f"{d['weights_usdt'][s]:.0%}{note} |")
+    return r["targets"], "\n".join(rows)
+
+
+def describe(orders: list[dict], bids: dict[str, float]) -> str:
+    parts = []
+    for o in orders:
+        c = o["coin"]
+        idr = o["idr"] if o["type"] == "buy" else float(o[c]) * bids[c]
+        parts.append(f"{o['type']} {c.upper()} ≈Rp{idr:,.0f}")
+    return ", ".join(parts) or "no orders"
+
+
 def main() -> int:
     live = os.environ.get("LIVE_TRADING", "").strip().lower() == "true"
     key = os.environ.get("INDODAX_API_KEY", "").strip()
@@ -216,9 +265,19 @@ def main() -> int:
         mins[c] = (float(p["trade_min_base_currency"]), float(p["trade_min_traded_currency"]))
     log("\n".join(rows))
 
-    targets = target_weights(signals)
-    log("Target weights: " + ", ".join(f"{c.upper()} {w:.0%}" for c, w in targets.items())
-        + f" | rupiah {1 - sum(targets.values()):.0%}")
+    tsmom = target_weights(signals)
+    log("TSMOM target: " + fmt_weights(tsmom))
+
+    ml, ml_log = ml_part(list(bids))
+    log(f"#### ML sleeve — {'SHADOW (not traded)' if ML_WEIGHT == 0 else f'LIVE, weight {ML_WEIGHT:.0%}'}")
+    log(ml_log)
+    if ml is None and ML_WEIGHT > 0:
+        log("ML is part of live trading but failed today → no trades placed.")
+        return 1
+    if ml is not None:
+        log("ML target: " + fmt_weights(ml))
+    targets = blend(tsmom, ml, ML_WEIGHT) if (ml is not None and ML_WEIGHT > 0) else tsmom
+    log("**Trading target:** " + fmt_weights(targets))
 
     if not key or not secret:
         log("No API key set — signals only.")
@@ -228,6 +287,12 @@ def main() -> int:
     equity = idr_free + sum(float(holdings[c]) * bids[c] for c in bids)
     held = ", ".join(f"{float(holdings[c]):.8g} {c.upper()}" for c in COINS if holdings[c] > 0) or "no coins"
     log(f"Equity managed by bot ≈ Rp{equity:,.0f} (free rupiah Rp{idr_free:,.0f} + {held})")
+
+    if ml is not None and ML_WEIGHT == 0:
+        for name, t in (("ML alone", ml), ("50:50 TSMOM+ML", blend(tsmom, ml, 0.5))):
+            s_, b_ = plan_orders(t, holdings, bids, idr_free, mins)
+            freed = sum(float(o[o["coin"]]) * bids[o["coin"]] for o in s_)
+            log(f"Shadow — {name} would place: {describe(s_ + size_buys(b_, idr_free + freed), bids)}")
 
     sells, buys = plan_orders(targets, holdings, bids, idr_free, mins)
     if not sells and not buys:

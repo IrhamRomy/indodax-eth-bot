@@ -105,10 +105,13 @@ class TestPlan(unittest.TestCase):
 class TestMainFlow(unittest.TestCase):
     """End-to-end against a fake Indodax: checks exactly what would be sent."""
 
-    def run_main(self, live, trend, balance):
-        sent, day = [], 86400
+    PRICES = {"btc": 1.0e9, "eth": 3.0e7, "sol": 2.0e6, "xrp": 3.0e4, "doge": 3.0e3}
+
+    @staticmethod
+    def make_fake_http(trend, balance=None, sent=None):
+        day = 86400
         today = int(time.time()) // day * day
-        prices = {"btc": 1.0e9, "eth": 3.0e7, "sol": 2.0e6, "xrp": 3.0e4, "doge": 3.0e3}
+        prices = TestMainFlow.PRICES
 
         def series(c):
             n = 90
@@ -122,17 +125,26 @@ class TestMainFlow(unittest.TestCase):
             if url.endswith("/api/summaries"):
                 return {"tickers": {f"{c}_idr": {"buy": str(p), "sell": str(p * 1.001)} for c, p in prices.items()}}
             if "history_v2" in url:
-                sym = url.split("symbol=")[1].split("IDR")[0].lower()
-                return series(sym)
+                return series(url.split("symbol=")[1].split("IDR")[0].lower())
             body = data.decode()
-            sent.append(body)
+            if sent is not None:
+                sent.append(body)
             if "method=getInfo" in body:
-                return {"success": 1, "return": {"balance": balance}}
+                return {"success": 1, "return": {"balance": balance or {}}}
             return {"success": 1, "return": {"order_id": 1}}
+        return fake_http
 
+    def run_main(self, live, trend, balance):
+        sent = []
+        fake_http = TestMainFlow.make_fake_http(trend, balance, sent)
+        return self._run_with(fake_http, sent, live)
+
+    def _run_with(self, fake_http, sent, live, ml=(None, "ML off in tests"), ml_weight=0.0):
         env = {"LIVE_TRADING": "true" if live else "false",
                "INDODAX_API_KEY": "k", "INDODAX_API_SECRET": "s", "GITHUB_STEP_SUMMARY": ""}
         with mock.patch.object(bot, "_http", fake_http), mock.patch.object(bot.time, "sleep"), \
+                mock.patch.object(bot, "ml_part", lambda coins: ml), \
+                mock.patch.object(bot, "ML_WEIGHT", ml_weight), \
                 mock.patch.dict(os.environ, env):
             self.assertEqual(bot.main(), 0)
         return [b for b in sent if "method=trade" in b]
@@ -156,6 +168,53 @@ class TestMainFlow(unittest.TestCase):
         pairs = sorted(t.split("pair=")[1].split("&")[0] + ":" + t.split("type=")[1].split("&")[0] for t in trades)
         self.assertEqual(pairs, ["btc_idr:buy", "eth_idr:sell", "sol_idr:buy"])
         self.assertTrue(trades[0].count("type=sell"))  # sells go first
+
+
+class TestMLSleeve(unittest.TestCase):
+    def test_blend(self):
+        b = bot.blend({"btc": 0.2, "eth": 0.0}, {"btc": 0.0, "eth": 0.1}, 0.5)
+        self.assertAlmostEqual(b["btc"], 0.1)
+        self.assertAlmostEqual(b["eth"], 0.05)
+        self.assertEqual(bot.blend({"btc": 0.2}, {"btc": 0.9}, 0.0)["btc"], 0.2)
+
+    def _run(self, ml_weight, ml_result, trend, balance):
+        sent = []
+        fake = TestMainFlow.make_fake_http(trend, balance, sent)
+        return TestMainFlow._run_with(self, fake, sent, True, ml=ml_result, ml_weight=ml_weight)
+
+    def test_shadow_never_trades_ml(self):
+        # TSMOM says all cash; ML says buy BTC. Shadow mode → only TSMOM trades (nothing to do).
+        trades = self._run(0.0, ({"btc": 0.2, "eth": 0, "sol": 0, "xrp": 0, "doge": 0}, "ml"),
+                           TestMainFlow.down, {"idr": 500000})
+        self.assertEqual(trades, [])
+
+    def test_shadow_ml_failure_does_not_block_tsmom(self):
+        trades = self._run(0.0, (None, "ML signal unavailable"), TestMainFlow.down,
+                           {"idr": 0, "eth": "0.0048"})
+        self.assertEqual(len(trades), 1)
+        self.assertIn("type=sell", trades[0])
+
+    def test_live_blend_buys_ml_half(self):
+        trades = self._run(0.5, ({"btc": 0.2, "eth": 0, "sol": 0, "xrp": 0, "doge": 0}, "ml"),
+                           TestMainFlow.down, {"idr": 1000000})
+        self.assertEqual(len(trades), 1)
+        self.assertIn("pair=btc_idr", trades[0])
+        self.assertIn("idr=100000", trades[0])  # 50% x 20% x Rp1,000,000
+
+    def test_live_ml_failure_blocks_all_trades(self):
+        from unittest import mock as m
+        env = {"LIVE_TRADING": "true", "INDODAX_API_KEY": "k", "INDODAX_API_SECRET": "s",
+               "GITHUB_STEP_SUMMARY": ""}
+        sent = []
+        with m.patch.object(bot, "ML_WEIGHT", 0.5), \
+                m.patch.object(bot, "ml_part", lambda coins: (None, "down")), \
+                m.patch.dict(os.environ, env), \
+                m.patch.object(bot, "private", lambda *a, **k: sent.append(a) or {"balance": {}}):
+            # reuse the fake public endpoints from TestMainFlow
+            fake = TestMainFlow.make_fake_http(TestMainFlow.down)
+            with m.patch.object(bot, "_http", fake):
+                self.assertEqual(bot.main(), 1)
+        self.assertEqual(sent, [])
 
 
 if __name__ == "__main__":

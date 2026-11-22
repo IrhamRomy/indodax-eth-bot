@@ -1,0 +1,42 @@
+{
+  "trained_through": "2026-11-17 20:00:00+00:00",
+  "rows": 116620,
+  "features": [
+    "ret_1",
+    "ret_6",
+    "ret_18",
+    "ret_42",
+    "ret_126",
+    "zret_6",
+    "zret_18",
+    "zret_42",
+    "zret_126",
+    "vol_42",
+    "vol_ratio",
+    "range_18",
+    "dist_sma",
+    "volu_z",
+    "xs_rank_42",
+    "mkt_ret_42",
+    "mkt_vol_42"
+  ],
+  "horizon": 18,
+  "barrier_k": 1.5,
+  "lgb_params": {
+    "objective": "binary",
+    "learning_rate": 0.03,
+    "num_leaves": 15,
+    "max_depth": 5,
+    "min_data_in_leaf": 400,
+    "feature_fraction": 0.7,
+    "bagging_fraction": 0.7,
+    "bagging_freq": 1,
+    "lambda_l2": 10.0,
+    "verbose": -1,
+    "seed": 7,
+    "deterministic": true,
+    "num_threads": 4
+  },
+  "n_trees": 300,
+  "sha256": "a0d93d8ee3007b086fc3db23db846d5d6166c221462d9df19c6f18f07f488011"
+}
