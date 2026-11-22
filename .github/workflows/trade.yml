@@ -40,6 +40,9 @@ jobs:
           ML_WEIGHT: ${{ vars.ML_WEIGHT || '0' }}
           MAX_TRADE_IDR: ${{ vars.MAX_TRADE_IDR || '1000000' }}
           COINS: ${{ vars.COINS || 'btc,eth,sol,xrp,doge' }}
+          # Redacts balances, coin amounts and raw order responses while the repo is public.
+          # Set the repo variable PUBLIC_LOG=false only after the repo is made private.
+          PUBLIC_LOG: ${{ vars.PUBLIC_LOG || 'true' }}
           INDODAX_API_KEY: ${{ secrets.INDODAX_API_KEY }}
           INDODAX_API_SECRET: ${{ secrets.INDODAX_API_SECRET }}
         run: python -I bot.py

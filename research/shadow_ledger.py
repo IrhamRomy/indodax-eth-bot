@@ -107,7 +107,8 @@ def main() -> int:
     out = [f"### Shadow ledger — {a.run_date} (run {a.run_id})", "",
            "| Portfolio | Today | Equity | Since start | Max DD | Invested | Fees paid | Turnover |",
            "|---|---|---|---|---|---|---|---|"]
-    row = {"date": a.run_date, "run_id": a.run_id, "live_equity": rec.get("equity"),
+    row = {"date": a.run_date, "run_id": a.run_id, "live_equity": rec.get("equity"),  # None in public-log mode
+           "live_invested": rec.get("live_invested"),
            "ml_ok": ml is not None, "agree": None}
     for n in NAMES:
         pf = state["portfolios"][n]

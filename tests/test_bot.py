@@ -1,3 +1,4 @@
+import json
 import math
 import os
 import sys
@@ -297,3 +298,40 @@ class TestMLSleeve(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPublicLog(unittest.TestCase):
+    """While the repo is public, nothing in stdout or RESULT_JSON may reveal account size."""
+
+    def _capture(self, public: str):
+        import contextlib
+        import io
+        buf = io.StringIO()
+        sent = []
+        fake = TestMainFlow.make_fake_http(TestMainFlow.mixed, {"idr": 523456, "eth": "0.0048"}, sent)
+        with mock.patch.dict(os.environ, {"PUBLIC_LOG": public}), contextlib.redirect_stdout(buf):
+            trades = TestMainFlow._run_with(self, fake, sent, True)
+            bot.print_record(0)
+        return buf.getvalue(), trades
+
+    def test_public_hides_balances_and_sizes(self):
+        out, trades = self._capture("true")
+        self.assertTrue(trades)                         # still trades normally
+        for secret in ("523,456", "523456", "0.0048", "eth=0.0048", "idr="):
+            self.assertNotIn(secret, out)
+        rec = json.loads(out.split("RESULT_JSON ", 1)[1])
+        for k in ("equity", "idr_free", "holdings"):
+            self.assertNotIn(k, rec)
+        self.assertIn("live_invested", rec)
+        self.assertTrue(all(set(o) <= {"coin", "type", "success", "fee_pct"} for o in rec["orders_sent"]))
+
+    def test_private_mode_keeps_full_detail(self):
+        out, _ = self._capture("false")
+        self.assertIn("523,456", out)
+        rec = json.loads(out.split("RESULT_JSON ", 1)[1])
+        self.assertIn("equity", rec)
+
+    def test_order_summary_fee_pct(self):
+        s = bot.order_summary({"receive_rp": "185987", "fee": "771", "balance": {"idr": 9}})
+        self.assertEqual(s, {"success": True, "fee_pct": 0.4145})
+        self.assertIsNone(bot.order_summary("garbage")["fee_pct"])

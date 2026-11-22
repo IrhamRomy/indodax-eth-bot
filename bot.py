@@ -61,6 +61,26 @@ ALLOWED_METHODS = {"getInfo", "trade"}
 RECORD: dict = {}  # machine-readable summary, printed as one "RESULT_JSON {...}" line at the end
 
 
+def public_log() -> bool:
+    """True unless PUBLIC_LOG is exactly "false". While the repo (and so its Actions logs) is public,
+    the log and RESULT_JSON show weights and percentages only: no rupiah balances, coin amounts,
+    order sizes or raw Indodax responses. Set the repo variable PUBLIC_LOG=false once it is private."""
+    return os.environ.get("PUBLIC_LOG", "true").strip().lower() != "false"
+
+
+def order_summary(ret: object) -> dict:
+    """Size-free summary of a successful trade (private() already raised on failure):
+    fee as % of the order value, nothing else (the raw response can include account balances)."""
+    ret = ret if isinstance(ret, dict) else {}
+    try:
+        fee = float(ret.get("fee", 0) or 0)
+        gross = float(ret.get("spend_rp") or ret.get("receive_rp") or 0)
+        fee_pct = round(100 * fee / gross, 4) if gross > 0 else None
+    except (TypeError, ValueError):
+        fee_pct = None
+    return {"success": True, "fee_pct": fee_pct}
+
+
 # ---------------------------------------------------------------- HTTP
 def _http(url: str, data: bytes | None = None, headers: dict | None = None) -> object:
     if not url.startswith(BASE + "/"):
@@ -239,11 +259,19 @@ def send(order: dict, key: str, secret: str, live: bool, day: str) -> None:
     order = dict(order)
     coin = order.pop("coin")
     order["client_order_id"] = f"tsmom-{day}-{coin}-{order['type']}"
-    log(f"- {order['type'].upper()} {coin.upper()}: `{order}`")
+    if public_log():
+        log(f"- {order['type'].upper()} {coin.upper()} (market order; size hidden in public log)")
+    else:
+        log(f"- {order['type'].upper()} {coin.upper()}: `{order}`")
     if live:
         res = private("trade", key, secret, pair=f"{coin}_idr", **order)
-        RECORD.setdefault("orders_sent", []).append({"coin": coin, **order, "response": res})
-        log(f"  → sent, Indodax response: `{res}`")
+        if public_log():
+            summ = order_summary(res)
+            RECORD.setdefault("orders_sent", []).append({"coin": coin, "type": order["type"], **summ})
+            log(f"  → sent, success={summ['success']}, fee {summ['fee_pct']}% of order value")
+        else:
+            RECORD.setdefault("orders_sent", []).append({"coin": coin, **order, "response": res})
+            log(f"  → sent, Indodax response: `{res}`")
 
 
 def blend(a: dict[str, float], b: dict[str, float], wb: float) -> dict[str, float]:
@@ -281,12 +309,14 @@ def ml_part(coins: list[str]) -> tuple[dict[str, float] | None, str]:
     return r["targets"], "\n".join(rows)
 
 
-def describe(orders: list[dict], bids: dict[str, float]) -> str:
+def describe(orders: list[dict], bids: dict[str, float], equity: float | None = None) -> str:
+    """Orders in words. With `equity` given, sizes are shown as % of equity instead of rupiah."""
     parts = []
     for o in orders:
         c = o["coin"]
         idr = o["idr"] if o["type"] == "buy" else float(o[c]) * bids[c]
-        parts.append(f"{o['type']} {c.upper()} ≈Rp{idr:,.0f}")
+        size = f"≈{idr / equity:.0%} of equity" if equity else f"≈Rp{idr:,.0f}"
+        parts.append(f"{o['type']} {c.upper()} {size}")
     return ", ".join(parts) or "no orders"
 
 
@@ -296,6 +326,7 @@ def main() -> int:
     secret = os.environ.get("INDODAX_API_SECRET", "").strip()
     now = int(time.time())
     day = datetime.now(timezone.utc).strftime("%Y%m%d")
+    RECORD.clear()  # one record per run (also keeps tests independent)
     log(f"### Run {datetime.now(timezone.utc):%Y-%m-%d %H:%M} UTC — mode: {'LIVE' if live else 'DRY RUN'}")
     RECORD.update(time=datetime.now(timezone.utc).isoformat(timespec="seconds"), live=live,
                   ml_weight=ML_WEIGHT, coins={}, orders_sent=[])
@@ -386,16 +417,22 @@ def main() -> int:
         RECORD["warnings"] = [f"holding {c.upper()} but it could not be traded today "
                               f"({RECORD['coins'].get(c, {}).get('status', 'not listed / delisted')})" for c in stuck]
         log("**WARNING:** " + "; ".join(RECORD["warnings"]) + ". Check Indodax announcements (delisting?).")
-    log(f"Equity managed by bot ≈ Rp{equity:,.0f} (free rupiah Rp{idr_free:,.0f} + {held})")
-    RECORD.update(equity=equity, idr_free=idr_free, holdings={c: str(q) for c, q in holdings.items() if q > 0})
+    if public_log():
+        now_w = {c: float(holdings[c]) * bids[c] / equity for c in bids} if equity > 0 else {}
+        log("Current holdings (public log: weights only): " + fmt_weights(now_w))
+        RECORD.update(live_weights=now_w, live_invested=sum(now_w.values()))
+    else:
+        log(f"Equity managed by bot ≈ Rp{equity:,.0f} (free rupiah Rp{idr_free:,.0f} + {held})")
+        RECORD.update(equity=equity, idr_free=idr_free, holdings={c: str(q) for c, q in holdings.items() if q > 0})
 
     if ml is not None and ML_WEIGHT == 0:
         for name, t in (("ML alone", ml), ("50:50 TSMOM+ML", blend(tsmom, ml, 0.5))):
             s_, b_ = plan_orders(t, holdings, bids, idr_free, mins)
             freed = sum(float(o[o["coin"]]) * bids[o["coin"]] for o in s_)
             would = s_ + size_buys(b_, idr_free + freed)
-            RECORD.setdefault("shadow_orders", {})[name] = would
-            log(f"Shadow — {name} would place: {describe(would, bids)}")
+            pub = equity if public_log() else None
+            RECORD.setdefault("shadow_orders", {})[name] = describe(would, bids, pub) if pub else would
+            log(f"Shadow — {name} would place: {describe(would, bids, pub)}")
 
     sells, buys = plan_orders(targets, holdings, bids, idr_free, mins)
     if not sells and not buys:
