@@ -53,6 +53,9 @@ ML_WEIGHT = float(os.environ.get("ML_WEIGHT", "0") or 0)  # 0 = ML in shadow mod
 if not 0.0 <= ML_WEIGHT <= 1.0:
     raise SystemExit(f"ML_WEIGHT must be between 0 and 1, got {ML_WEIGHT}")
 MAX_SPREAD = 0.01
+MIN_VOL30_IDR = float(os.environ.get("MIN_VOL30_IDR", "300000000"))  # safety guard: 30-day median IDR volume
+STABLE_PREFIXES = ("usd", "idr", "eur")
+STABLE_EXACT = {"dai", "tusd", "fdusd", "busd", "pyusd", "xaut", "paxg"}
 BUY_BUFFER = 0.995
 ALLOWED_METHODS = {"getInfo", "trade"}
 RECORD: dict = {}  # machine-readable summary, printed as one "RESULT_JSON {...}" line at the end
@@ -97,6 +100,38 @@ def completed_daily_closes(candles: list[dict], now_ts: int) -> list[tuple[int, 
     today_start = now_ts - now_ts % 86400
     rows = sorted((int(c["Time"]), float(c["Close"])) for c in candles)
     return [(t, c) for t, c in rows if t < today_start]
+
+
+def median_idr_volume(candles: list[dict], now_ts: int, days: int = 30) -> float:
+    """Median daily IDR volume (coin volume x close) over the last `days` completed days."""
+    today_start = now_ts - now_ts % 86400
+    rows = sorted((int(c["Time"]), float(c["Volume"]) * float(c["Close"])) for c in candles
+                  if int(c["Time"]) < today_start)[-days:]
+    if len(rows) < min(days, 20):
+        return float("nan")
+    vals = sorted(v for _, v in rows)
+    mid = len(vals) // 2
+    return vals[mid] if len(vals) % 2 else (vals[mid - 1] + vals[mid]) / 2
+
+
+def big_coin_watch(tickers: dict, coins: list[str], top: int = 8) -> list[tuple[str, float, bool]]:
+    """Top non-stablecoin IDR markets by 24h volume with spread <= 2%: (coin, volume, in bot's list)."""
+    out = []
+    for k, t in tickers.items():
+        if not k.endswith("_idr"):
+            continue
+        c = k[:-4]
+        if c in STABLE_EXACT or c.startswith(STABLE_PREFIXES):
+            continue
+        try:
+            b, a = float(t["buy"]), float(t["sell"])
+            if a <= 0 or (a - b) / a > 0.02:  # untradeable (spread > 2%)
+                continue
+            out.append((c, float(t.get("vol_idr", 0))))
+        except (KeyError, TypeError, ValueError):
+            continue
+    out.sort(key=lambda x: -x[1])
+    return [(c, v, c in coins) for c, v in out[:top]]
 
 
 def momentum(closes: list[float], lookback: int) -> float:
@@ -267,15 +302,25 @@ def main() -> int:
             r, v = momentum(closes, LOOKBACK_DAYS), annual_vol(closes)
         except RuntimeError as e:
             problem, r, v = problem or str(e), float("nan"), float("nan")
-        rows.append(f"| {c.upper()} | {bid:,.0f} | {r:+.1%} | {v:.0%} | {problem or 'ok'} |")
-        RECORD["coins"][c] = {"bid": bid, "ask": ask, "ret21": r, "vol": v, "status": problem or "ok",
+        v30 = median_idr_volume(candles, now)
+        exit_only = not problem and not (v30 >= MIN_VOL30_IDR)
+        status = problem or (f"low liquidity (30d median Rp{v30:,.0f}) → exit only" if exit_only else "ok")
+        rows.append(f"| {c.upper()} | {bid:,.0f} | {r:+.1%} | {v:.0%} | {status} |")
+        RECORD["coins"][c] = {"bid": bid, "ask": ask, "ret21": r, "vol": v, "vol30_idr": v30,
+                              "status": "ok" if exit_only else status, "exit_only": exit_only,
                               "min_idr": float(p["trade_min_base_currency"]),
                               "min_coin": float(p["trade_min_traded_currency"])}
         if problem:
             continue  # leave this coin untouched today
-        signals[c], bids[c] = (r, v), bid
+        # safety guard: a coin whose liquidity dried up is never bought; any holding is sold
+        signals[c], bids[c] = ((-1.0 if exit_only else r), v), bid
         mins[c] = (float(p["trade_min_base_currency"]), float(p["trade_min_traded_currency"]))
     log("\n".join(rows))
+    watch = big_coin_watch(tickers, COINS)
+    RECORD["big_coin_watch"] = [{"coin": c, "vol24h_idr": v, "in_bot": b} for c, v, b in watch]
+    log("Big-coin watch (top IDR markets by 24h volume, stablecoins excluded): "
+        + ", ".join(f"{c.upper()}{'' if b else '*'} Rp{v / 1e9:.1f}B" for c, v, b in watch)
+        + " — * = not traded by the bot (memes and coins that failed the tests stay out on purpose)")
 
     tsmom = target_weights(signals)
     log("TSMOM target: " + fmt_weights(tsmom))
@@ -301,6 +346,11 @@ def main() -> int:
     idr_free, holdings = balances(key, secret)
     equity = idr_free + sum(float(holdings[c]) * bids[c] for c in bids)
     held = ", ".join(f"{float(holdings[c]):.8g} {c.upper()}" for c in COINS if holdings[c] > 0) or "no coins"
+    stuck = [c for c in COINS if holdings[c] > 0 and c not in bids]
+    if stuck:
+        RECORD["warnings"] = [f"holding {c.upper()} but it could not be traded today "
+                              f"({RECORD['coins'].get(c, {}).get('status', 'not listed / delisted')})" for c in stuck]
+        log("**WARNING:** " + "; ".join(RECORD["warnings"]) + ". Check Indodax announcements (delisting?).")
     log(f"Equity managed by bot ≈ Rp{equity:,.0f} (free rupiah Rp{idr_free:,.0f} + {held})")
     RECORD.update(equity=equity, idr_free=idr_free, holdings={c: str(q) for c, q in holdings.items() if q > 0})
 

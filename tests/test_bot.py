@@ -108,22 +108,27 @@ class TestMainFlow(unittest.TestCase):
     PRICES = {"btc": 1.0e9, "eth": 3.0e7, "sol": 2.0e6, "xrp": 3.0e4, "doge": 3.0e3}
 
     @staticmethod
-    def make_fake_http(trend, balance=None, sent=None):
+    def make_fake_http(trend, balance=None, sent=None, volume=None, delisted=()):
         day = 86400
         today = int(time.time()) // day * day
         prices = TestMainFlow.PRICES
 
         def series(c):
             n = 90
-            return [{"Time": today - (n - i) * day,
-                     "Close": prices[c] * (1 + trend[c] * i / n) * (1 + 0.02 * (-1) ** i)} for i in range(n)]
+            vol_idr = (volume or {}).get(c, 5e9)
+            rows = []
+            for i in range(n):
+                px = prices[c] * (1 + trend[c] * i / n) * (1 + 0.02 * (-1) ** i)
+                rows.append({"Time": today - (n - i) * day, "Close": px, "Volume": str(vol_idr / px)})
+            return rows
 
         def fake_http(url, data=None, headers=None):
             if url.endswith("/api/pairs"):
                 return [{"id": f"{c}idr", "trade_min_base_currency": 10000,
-                         "trade_min_traded_currency": 1e-8} for c in prices]
+                         "trade_min_traded_currency": 1e-8} for c in prices if c not in delisted]
             if url.endswith("/api/summaries"):
-                return {"tickers": {f"{c}_idr": {"buy": str(p), "sell": str(p * 1.001)} for c, p in prices.items()}}
+                return {"tickers": {f"{c}_idr": {"buy": str(p), "sell": str(p * 1.001), "vol_idr": "1e9"}
+                                    for c, p in prices.items() if c not in delisted}}
             if "history_v2" in url:
                 return series(url.split("symbol=")[1].split("IDR")[0].lower())
             body = data.decode()
@@ -168,6 +173,43 @@ class TestMainFlow(unittest.TestCase):
         pairs = sorted(t.split("pair=")[1].split("&")[0] + ":" + t.split("type=")[1].split("&")[0] for t in trades)
         self.assertEqual(pairs, ["btc_idr:buy", "eth_idr:sell", "sol_idr:buy"])
         self.assertTrue(trades[0].count("type=sell"))  # sells go first
+
+
+class TestSafetyGuard(unittest.TestCase):
+    def _run(self, trend, balance, **kw):
+        sent = []
+        fake = TestMainFlow.make_fake_http(trend, balance, sent, **kw)
+        TestMainFlow._run_with(self, fake, sent, True)
+        return [b for b in sent if "method=trade" in b]
+
+    def test_median_volume(self):
+        day, now = 86400, 100 * 86400 + 10
+        candles = [{"Time": (70 + i) * day, "Close": 2.0, "Volume": str(v)} for i, v in enumerate([1] * 15 + [3] * 15)]
+        self.assertEqual(bot.median_idr_volume(candles, now), 4.0)  # median of 2s and 6s
+        self.assertTrue(math.isnan(bot.median_idr_volume(candles[:5], now)))
+
+    def test_low_liquidity_sells_and_never_buys(self):
+        up = {c: 0.3 for c in TestMainFlow.PRICES}
+        trades = self._run(up, {"idr": 1_000_000, "eth": "0.01"}, volume={"eth": 1e8})  # ETH Rp100M/day
+        eth = [t for t in trades if "pair=eth_idr" in t]
+        self.assertEqual(len(eth), 1)
+        self.assertIn("type=sell", eth[0])
+        self.assertTrue(bot.RECORD["coins"]["eth"]["exit_only"])
+        self.assertTrue(any("pair=btc_idr" in t and "type=buy" in t for t in trades))
+
+    def test_delisted_holding_warns(self):
+        down = TestMainFlow.down
+        self._run(down, {"idr": 0, "sol": "1.0"}, delisted=("sol",))
+        self.assertTrue(any("SOL" in w for w in bot.RECORD.get("warnings", [])))
+
+    def test_watch_excludes_stables_and_wide_spreads(self):
+        tick = {"usdt_idr": {"buy": "1", "sell": "1", "vol_idr": "9e12"},
+                "btc_idr": {"buy": "100", "sell": "100.1", "vol_idr": "5e9"},
+                "junk_idr": {"buy": "90", "sell": "100", "vol_idr": "8e9"},
+                "pepe_idr": {"buy": "1", "sell": "1.0005", "vol_idr": "3e9"}}
+        w = bot.big_coin_watch(tick, ["btc"])
+        self.assertEqual([c for c, _, _ in w], ["btc", "pepe"])
+        self.assertEqual([b for _, _, b in w], [True, False])
 
 
 class TestMLSleeve(unittest.TestCase):

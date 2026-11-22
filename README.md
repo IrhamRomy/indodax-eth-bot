@@ -38,6 +38,15 @@ your real balance — but only TSMOM trades.
 - Dependencies: `requirements-ml.txt` (same hash-pinned, wheels-only set as the paper trial).
   If they fail to install, shadow mode just logs "ML signal unavailable" and TSMOM carries on.
 
+## Safety guard and big-coin watch
+- A coin whose 30-day median IDR volume falls below Rp300M (repo variable `MIN_VOL30_IDR`) is
+  "exit only": never bought, and any holding is sold. A held coin that can't be traded
+  (delisted / suspended) raises a WARNING in the summary.
+- Every run lists the top Indodax IDR markets by 24h volume (stablecoins and spreads > 2% excluded).
+  Coins marked * are not traded on purpose. To change the coin list, set the repo variable `COINS`
+  — ideally after re-running `research/universe_memes_study.py` (see research/RESULTS_*.md:
+  an automatic top-5-by-volume list and meme coins both tested worse).
+
 ## How much to deposit
 Indodax's minimum order is Rp10,000. A typical position is 10–18% of the account and a re-size is ~half of that,
 so below ~**Rp500,000** many adjustments are too small to place. Rp1,000,000+ works smoothly.

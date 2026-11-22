@@ -1,0 +1,2119 @@
+{
+  "data_end": "2026-11-21",
+  "coins_in_data": 404,
+  "tradable_coins": 171,
+  "memes_tradable": [
+    "bonk",
+    "chillguy",
+    "dogs",
+    "fartcoin",
+    "goat",
+    "jellyjelly",
+    "mog",
+    "moodeng",
+    "pengu",
+    "pepe",
+    "pippin",
+    "popcat",
+    "shib",
+    "spx",
+    "toshi",
+    "trump",
+    "useless",
+    "vine",
+    "wif",
+    "zerebro"
+  ],
+  "N_trials_for_DSR": 61,
+  "results": {
+    "U1_majors5|S1_tsmom21": {
+      "CAGR": 0.1315,
+      "sharpe": 0.764,
+      "max_dd": -0.2389,
+      "IS_2022_2024": {
+        "CAGR": 0.2468,
+        "sharpe": 1.222,
+        "max_dd": -0.2172
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.0302,
+        "sharpe": -0.11,
+        "max_dd": -0.2389
+      },
+      "by_year": {
+        "2022": -0.1331,
+        "2023": 0.4154,
+        "2024": 0.5807,
+        "2025": -0.0221,
+        "2026": -0.0351
+      },
+      "turnover_per_year": 17.6,
+      "DSR_N61": 0.382
+    },
+    "U1_majors5|S2_tsmom63": {
+      "CAGR": 0.0801,
+      "sharpe": 0.493,
+      "max_dd": -0.2864,
+      "IS_2022_2024": {
+        "CAGR": 0.2035,
+        "sharpe": 1.0,
+        "max_dd": -0.2231
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.0903,
+        "sharpe": -0.456,
+        "max_dd": -0.2864
+      },
+      "by_year": {
+        "2022": -0.201,
+        "2023": 0.4488,
+        "2024": 0.5066,
+        "2025": -0.031,
+        "2026": -0.1371
+      },
+      "turnover_per_year": 11.5,
+      "DSR_N61": 0.182
+    },
+    "U1_majors5|S3_above_sma50": {
+      "CAGR": 0.1881,
+      "sharpe": 1.015,
+      "max_dd": -0.2184,
+      "IS_2022_2024": {
+        "CAGR": 0.2843,
+        "sharpe": 1.377,
+        "max_dd": -0.2184
+      },
+      "OOS_2025_2026": {
+        "CAGR": 0.0499,
+        "sharpe": 0.368,
+        "max_dd": -0.1975
+      },
+      "by_year": {
+        "2022": -0.106,
+        "2023": 0.5878,
+        "2024": 0.4935,
+        "2025": 0.0332,
+        "2026": 0.0612
+      },
+      "turnover_per_year": 10.9,
+      "DSR_N61": 0.605
+    },
+    "U1_majors5|S4_sma20_gt_sma100": {
+      "CAGR": 0.0811,
+      "sharpe": 0.518,
+      "max_dd": -0.2208,
+      "IS_2022_2024": {
+        "CAGR": 0.1965,
+        "sharpe": 1.034,
+        "max_dd": -0.1898
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.0797,
+        "sharpe": -0.408,
+        "max_dd": -0.2208
+      },
+      "by_year": {
+        "2022": -0.1698,
+        "2023": 0.3844,
+        "2024": 0.4911,
+        "2025": 0.0031,
+        "2026": -0.1479
+      },
+      "turnover_per_year": 3.2,
+      "DSR_N61": 0.198
+    },
+    "U1_majors5|S5_donchian20_10": {
+      "CAGR": 0.1611,
+      "sharpe": 1.059,
+      "max_dd": -0.1654,
+      "IS_2022_2024": {
+        "CAGR": 0.2734,
+        "sharpe": 1.53,
+        "max_dd": -0.1466
+      },
+      "OOS_2025_2026": {
+        "CAGR": 0.0027,
+        "sharpe": 0.083,
+        "max_dd": -0.1654
+      },
+      "by_year": {
+        "2022": -0.1077,
+        "2023": 0.345,
+        "2024": 0.7215,
+        "2025": 0.0102,
+        "2026": -0.005
+      },
+      "turnover_per_year": 7.6,
+      "DSR_N61": 0.643
+    },
+    "U1_majors5|BUY_HOLD_EW": {
+      "CAGR": 0.0078,
+      "sharpe": 0.319,
+      "max_dd": -0.7008,
+      "IS_2022_2024": {
+        "CAGR": 0.3066,
+        "sharpe": 0.743,
+        "max_dd": -0.7008
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.3329,
+        "sharpe": -0.389,
+        "max_dd": -0.6485
+      },
+      "by_year": {
+        "2022": -0.6998,
+        "2023": 1.7915,
+        "2024": 1.664,
+        "2025": -0.2402,
+        "2026": -0.3876
+      },
+      "turnover_per_year": 5.1
+    },
+    "U2_auto_majors|S1_tsmom21": {
+      "CAGR": 0.0853,
+      "sharpe": 0.548,
+      "max_dd": -0.237,
+      "IS_2022_2024": {
+        "CAGR": 0.1622,
+        "sharpe": 0.884,
+        "max_dd": -0.2264
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.0266,
+        "sharpe": -0.095,
+        "max_dd": -0.237
+      },
+      "by_year": {
+        "2022": -0.1616,
+        "2023": 0.2754,
+        "2024": 0.4689,
+        "2025": -0.0221,
+        "2026": -0.0283
+      },
+      "turnover_per_year": 18.2,
+      "DSR_N61": 0.219
+    },
+    "U2_auto_majors|S2_tsmom63": {
+      "CAGR": 0.0659,
+      "sharpe": 0.429,
+      "max_dd": -0.2876,
+      "IS_2022_2024": {
+        "CAGR": 0.1728,
+        "sharpe": 0.888,
+        "max_dd": -0.2376
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.0842,
+        "sharpe": -0.427,
+        "max_dd": -0.2876
+      },
+      "by_year": {
+        "2022": -0.2228,
+        "2023": 0.4207,
+        "2024": 0.4617,
+        "2025": -0.031,
+        "2026": -0.1261
+      },
+      "turnover_per_year": 11.9,
+      "DSR_N61": 0.149
+    },
+    "U2_auto_majors|S3_above_sma50": {
+      "CAGR": 0.1326,
+      "sharpe": 0.774,
+      "max_dd": -0.2356,
+      "IS_2022_2024": {
+        "CAGR": 0.2016,
+        "sharpe": 1.05,
+        "max_dd": -0.2356
+      },
+      "OOS_2025_2026": {
+        "CAGR": 0.0312,
+        "sharpe": 0.268,
+        "max_dd": -0.2072
+      },
+      "by_year": {
+        "2022": -0.1187,
+        "2023": 0.4272,
+        "2024": 0.3799,
+        "2025": 0.0332,
+        "2026": 0.0257
+      },
+      "turnover_per_year": 11.7,
+      "DSR_N61": 0.392
+    },
+    "U2_auto_majors|S4_sma20_gt_sma100": {
+      "CAGR": 0.0614,
+      "sharpe": 0.419,
+      "max_dd": -0.2342,
+      "IS_2022_2024": {
+        "CAGR": 0.166,
+        "sharpe": 0.902,
+        "max_dd": -0.2098
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.0858,
+        "sharpe": -0.454,
+        "max_dd": -0.2342
+      },
+      "by_year": {
+        "2022": -0.1943,
+        "2023": 0.3606,
+        "2024": 0.4466,
+        "2025": 0.0031,
+        "2026": -0.1586
+      },
+      "turnover_per_year": 3.5,
+      "DSR_N61": 0.143
+    },
+    "U2_auto_majors|S5_donchian20_10": {
+      "CAGR": 0.1252,
+      "sharpe": 0.872,
+      "max_dd": -0.1748,
+      "IS_2022_2024": {
+        "CAGR": 0.2041,
+        "sharpe": 1.221,
+        "max_dd": -0.1458
+      },
+      "OOS_2025_2026": {
+        "CAGR": 0.0103,
+        "sharpe": 0.145,
+        "max_dd": -0.1748
+      },
+      "by_year": {
+        "2022": -0.1123,
+        "2023": 0.2056,
+        "2024": 0.6321,
+        "2025": 0.0102,
+        "2026": 0.0093
+      },
+      "turnover_per_year": 8.0,
+      "DSR_N61": 0.478
+    },
+    "U2_auto_majors|BUY_HOLD_EW": {
+      "CAGR": -0.0524,
+      "sharpe": 0.2,
+      "max_dd": -0.6892,
+      "IS_2022_2024": {
+        "CAGR": 0.1496,
+        "sharpe": 0.531,
+        "max_dd": -0.6892
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.3028,
+        "sharpe": -0.311,
+        "max_dd": -0.6277
+      },
+      "by_year": {
+        "2022": -0.658,
+        "2023": 0.9605,
+        "2024": 1.2669,
+        "2025": -0.2402,
+        "2026": -0.3345
+      },
+      "turnover_per_year": 6.2
+    },
+    "U3_auto_all|S1_tsmom21": {
+      "CAGR": 0.055,
+      "sharpe": 0.393,
+      "max_dd": -0.2355,
+      "IS_2022_2024": {
+        "CAGR": 0.1024,
+        "sharpe": 0.604,
+        "max_dd": -0.2355
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.0161,
+        "sharpe": -0.038,
+        "max_dd": -0.2209
+      },
+      "by_year": {
+        "2022": -0.1616,
+        "2023": 0.2754,
+        "2024": 0.2534,
+        "2025": -0.0342,
+        "2026": 0.0042
+      },
+      "turnover_per_year": 17.5,
+      "DSR_N61": 0.131
+    },
+    "U3_auto_all|S2_tsmom63": {
+      "CAGR": 0.0675,
+      "sharpe": 0.439,
+      "max_dd": -0.2517,
+      "IS_2022_2024": {
+        "CAGR": 0.1282,
+        "sharpe": 0.693,
+        "max_dd": -0.2376
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.0223,
+        "sharpe": -0.056,
+        "max_dd": -0.2517
+      },
+      "by_year": {
+        "2022": -0.2228,
+        "2023": 0.4207,
+        "2024": 0.3008,
+        "2025": 0.0084,
+        "2026": -0.0497
+      },
+      "turnover_per_year": 11.3,
+      "DSR_N61": 0.153
+    },
+    "U3_auto_all|S3_above_sma50": {
+      "CAGR": 0.0974,
+      "sharpe": 0.61,
+      "max_dd": -0.2286,
+      "IS_2022_2024": {
+        "CAGR": 0.1509,
+        "sharpe": 0.831,
+        "max_dd": -0.2286
+      },
+      "OOS_2025_2026": {
+        "CAGR": 0.0175,
+        "sharpe": 0.189,
+        "max_dd": -0.2206
+      },
+      "by_year": {
+        "2022": -0.1187,
+        "2023": 0.4272,
+        "2024": 0.2126,
+        "2025": -0.001,
+        "2026": 0.0343
+      },
+      "turnover_per_year": 10.9,
+      "DSR_N61": 0.262
+    },
+    "U3_auto_all|S4_sma20_gt_sma100": {
+      "CAGR": 0.0523,
+      "sharpe": 0.374,
+      "max_dd": -0.2165,
+      "IS_2022_2024": {
+        "CAGR": 0.143,
+        "sharpe": 0.789,
+        "max_dd": -0.2098
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.0772,
+        "sharpe": -0.441,
+        "max_dd": -0.2165
+      },
+      "by_year": {
+        "2022": -0.1943,
+        "2023": 0.3606,
+        "2024": 0.3625,
+        "2025": 0.0027,
+        "2026": -0.1432
+      },
+      "turnover_per_year": 3.6,
+      "DSR_N61": 0.121
+    },
+    "U3_auto_all|S5_donchian20_10": {
+      "CAGR": 0.0857,
+      "sharpe": 0.638,
+      "max_dd": -0.1624,
+      "IS_2022_2024": {
+        "CAGR": 0.1357,
+        "sharpe": 0.86,
+        "max_dd": -0.1458
+      },
+      "OOS_2025_2026": {
+        "CAGR": 0.0109,
+        "sharpe": 0.152,
+        "max_dd": -0.1624
+      },
+      "by_year": {
+        "2022": -0.1123,
+        "2023": 0.2056,
+        "2024": 0.3691,
+        "2025": -0.0123,
+        "2026": 0.0334
+      },
+      "turnover_per_year": 7.7,
+      "DSR_N61": 0.283
+    },
+    "U3_auto_all|BUY_HOLD_EW": {
+      "CAGR": -0.198,
+      "sharpe": -0.037,
+      "max_dd": -0.8109,
+      "IS_2022_2024": {
+        "CAGR": 0.068,
+        "sharpe": 0.406,
+        "max_dd": -0.6892
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.4913,
+        "sharpe": -0.638,
+        "max_dd": -0.8088
+      },
+      "by_year": {
+        "2022": -0.658,
+        "2023": 0.9605,
+        "2024": 0.8176,
+        "2025": -0.3761,
+        "2026": -0.5533
+      },
+      "turnover_per_year": 8.7
+    },
+    "U4_memes|S1_tsmom21": {
+      "CAGR": -0.0615,
+      "sharpe": -0.311,
+      "max_dd": -0.4789,
+      "IS_2022_2024": {
+        "CAGR": -0.005,
+        "sharpe": -0.036,
+        "max_dd": -0.1021
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.1448,
+        "sharpe": -0.516,
+        "max_dd": -0.4789
+      },
+      "by_year": {
+        "2022": 0.0,
+        "2023": 0.0,
+        "2024": -0.0151,
+        "2025": -0.0266,
+        "2026": -0.2356
+      },
+      "turnover_per_year": 6.5,
+      "DSR_N61": 0.005
+    },
+    "U4_memes|S2_tsmom63": {
+      "CAGR": -0.0275,
+      "sharpe": -0.112,
+      "max_dd": -0.3373,
+      "IS_2022_2024": {
+        "CAGR": 0.0328,
+        "sharpe": 0.472,
+        "max_dd": -0.0877
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.1161,
+        "sharpe": -0.446,
+        "max_dd": -0.3373
+      },
+      "by_year": {
+        "2022": 0.0,
+        "2023": 0.0,
+        "2024": 0.1017,
+        "2025": 0.0492,
+        "2026": -0.2452
+      },
+      "turnover_per_year": 4.7,
+      "DSR_N61": 0.013
+    },
+    "U4_memes|S3_above_sma50": {
+      "CAGR": -0.0278,
+      "sharpe": -0.09,
+      "max_dd": -0.4255,
+      "IS_2022_2024": {
+        "CAGR": 0.0374,
+        "sharpe": 0.504,
+        "max_dd": -0.0835
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.1232,
+        "sharpe": -0.414,
+        "max_dd": -0.4255
+      },
+      "by_year": {
+        "2022": 0.0,
+        "2023": 0.0,
+        "2024": 0.1167,
+        "2025": -0.0253,
+        "2026": -0.1999
+      },
+      "turnover_per_year": 5.4,
+      "DSR_N61": 0.015
+    },
+    "U4_memes|S4_sma20_gt_sma100": {
+      "CAGR": -0.0247,
+      "sharpe": -0.112,
+      "max_dd": -0.299,
+      "IS_2022_2024": {
+        "CAGR": 0.0339,
+        "sharpe": 0.473,
+        "max_dd": -0.1012
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.1111,
+        "sharpe": -0.486,
+        "max_dd": -0.299
+      },
+      "by_year": {
+        "2022": 0.0,
+        "2023": 0.0,
+        "2024": 0.1054,
+        "2025": 0.0372,
+        "2026": -0.2283
+      },
+      "turnover_per_year": 1.4,
+      "DSR_N61": 0.013
+    },
+    "U4_memes|S5_donchian20_10": {
+      "CAGR": -0.0492,
+      "sharpe": -0.376,
+      "max_dd": -0.358,
+      "IS_2022_2024": {
+        "CAGR": 0.0221,
+        "sharpe": 0.356,
+        "max_dd": -0.0766
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.1523,
+        "sharpe": -0.911,
+        "max_dd": -0.358
+      },
+      "by_year": {
+        "2022": 0.0,
+        "2023": 0.0,
+        "2024": 0.0677,
+        "2025": -0.112,
+        "2026": -0.176
+      },
+      "turnover_per_year": 3.0,
+      "DSR_N61": 0.003
+    },
+    "U4_memes|BUY_HOLD_EW": {
+      "CAGR": -0.202,
+      "sharpe": 0.044,
+      "max_dd": -0.852,
+      "IS_2022_2024": {
+        "CAGR": 0.0489,
+        "sharpe": 0.332,
+        "max_dd": -0.545
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.4831,
+        "sharpe": -0.17,
+        "max_dd": -0.7892
+      },
+      "by_year": {
+        "2022": 0.0,
+        "2023": 0.0,
+        "2024": 0.154,
+        "2025": -0.5433,
+        "2026": -0.3712
+      },
+      "turnover_per_year": 7.3
+    },
+    "U5_majors_plus_memes|S1_tsmom21": {
+      "CAGR": 0.0846,
+      "sharpe": 0.458,
+      "max_dd": -0.4291,
+      "IS_2022_2024": {
+        "CAGR": 0.225,
+        "sharpe": 1.034,
+        "max_dd": -0.2557
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.1061,
+        "sharpe": -0.29,
+        "max_dd": -0.4291
+      },
+      "by_year": {
+        "2022": -0.1331,
+        "2023": 0.4154,
+        "2024": 0.499,
+        "2025": -0.0394,
+        "2026": -0.1579
+      },
+      "turnover_per_year": 22.3,
+      "DSR_N61": 0.163
+    },
+    "U5_majors_plus_memes|S2_tsmom63": {
+      "CAGR": 0.0815,
+      "sharpe": 0.441,
+      "max_dd": -0.3428,
+      "IS_2022_2024": {
+        "CAGR": 0.2233,
+        "sharpe": 0.991,
+        "max_dd": -0.2231
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.1107,
+        "sharpe": -0.3,
+        "max_dd": -0.3428
+      },
+      "by_year": {
+        "2022": -0.201,
+        "2023": 0.4488,
+        "2024": 0.5821,
+        "2025": 0.051,
+        "2026": -0.2378
+      },
+      "turnover_per_year": 14.4,
+      "DSR_N61": 0.154
+    },
+    "U5_majors_plus_memes|S3_above_sma50": {
+      "CAGR": 0.1568,
+      "sharpe": 0.725,
+      "max_dd": -0.3847,
+      "IS_2022_2024": {
+        "CAGR": 0.3043,
+        "sharpe": 1.333,
+        "max_dd": -0.2085
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.0441,
+        "sharpe": -0.029,
+        "max_dd": -0.3847
+      },
+      "by_year": {
+        "2022": -0.106,
+        "2023": 0.5878,
+        "2024": 0.5644,
+        "2025": 0.0074,
+        "2026": -0.0885
+      },
+      "turnover_per_year": 14.7,
+      "DSR_N61": 0.349
+    },
+    "U5_majors_plus_memes|S4_sma20_gt_sma100": {
+      "CAGR": 0.095,
+      "sharpe": 0.507,
+      "max_dd": -0.271,
+      "IS_2022_2024": {
+        "CAGR": 0.2167,
+        "sharpe": 1.023,
+        "max_dd": -0.1898
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.0738,
+        "sharpe": -0.169,
+        "max_dd": -0.271
+      },
+      "by_year": {
+        "2022": -0.1698,
+        "2023": 0.3844,
+        "2024": 0.5681,
+        "2025": 0.1259,
+        "2026": -0.2316
+      },
+      "turnover_per_year": 4.2,
+      "DSR_N61": 0.192
+    },
+    "U5_majors_plus_memes|S5_donchian20_10": {
+      "CAGR": 0.1262,
+      "sharpe": 0.715,
+      "max_dd": -0.3286,
+      "IS_2022_2024": {
+        "CAGR": 0.2845,
+        "sharpe": 1.428,
+        "max_dd": -0.1466
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.0861,
+        "sharpe": -0.356,
+        "max_dd": -0.3286
+      },
+      "by_year": {
+        "2022": -0.1077,
+        "2023": 0.345,
+        "2024": 0.7669,
+        "2025": -0.0593,
+        "2026": -0.1033
+      },
+      "turnover_per_year": 9.8,
+      "DSR_N61": 0.341
+    },
+    "U5_majors_plus_memes|BUY_HOLD_EW": {
+      "CAGR": -0.0753,
+      "sharpe": 0.249,
+      "max_dd": -0.7318,
+      "IS_2022_2024": {
+        "CAGR": 0.206,
+        "sharpe": 0.614,
+        "max_dd": -0.7008
+      },
+      "OOS_2025_2026": {
+        "CAGR": -0.3936,
+        "sharpe": -0.218,
+        "max_dd": -0.6665
+      },
+      "by_year": {
+        "2022": -0.6998,
+        "2023": 1.7915,
+        "2024": 1.0942,
+        "2025": -0.3931,
+        "2026": -0.36
+      },
+      "turnover_per_year": 8.7
+    }
+  },
+  "Q1_auto_universe": {
+    "checks": {
+      "full Sharpe >= U1 - 0.05": false,
+      "MaxDD within 5pp": true,
+      "OOS Sharpe >= U1 - 0.10": true
+    },
+    "pass": false
+  },
+  "Q2_memes": {
+    "S1_tsmom21": {
+      "checks": {
+        "full Sharpe >= U1 + 0.10": false,
+        "OOS Sharpe >= U1": false,
+        "MaxDD within 5pp": false,
+        "DSR >= 0.95": false,
+        "memes-only CAGR > 0 in IS and OOS": false
+      },
+      "pass": false
+    },
+    "S2_tsmom63": {
+      "checks": {
+        "full Sharpe >= U1 + 0.10": false,
+        "OOS Sharpe >= U1": true,
+        "MaxDD within 5pp": false,
+        "DSR >= 0.95": false,
+        "memes-only CAGR > 0 in IS and OOS": false
+      },
+      "pass": false
+    },
+    "S3_above_sma50": {
+      "checks": {
+        "full Sharpe >= U1 + 0.10": false,
+        "OOS Sharpe >= U1": false,
+        "MaxDD within 5pp": false,
+        "DSR >= 0.95": false,
+        "memes-only CAGR > 0 in IS and OOS": false
+      },
+      "pass": false
+    },
+    "S4_sma20_gt_sma100": {
+      "checks": {
+        "full Sharpe >= U1 + 0.10": false,
+        "OOS Sharpe >= U1": true,
+        "MaxDD within 5pp": false,
+        "DSR >= 0.95": false,
+        "memes-only CAGR > 0 in IS and OOS": false
+      },
+      "pass": false
+    },
+    "S5_donchian20_10": {
+      "checks": {
+        "full Sharpe >= U1 + 0.10": false,
+        "OOS Sharpe >= U1": false,
+        "MaxDD within 5pp": false,
+        "DSR >= 0.95": false,
+        "memes-only CAGR > 0 in IS and OOS": false
+      },
+      "pass": false
+    }
+  },
+  "Q3_signals": {
+    "S2_tsmom63": {
+      "checks": {
+        "full Sharpe >= S1 + 0.10": false,
+        "OOS Sharpe >= S1": false,
+        "MaxDD within 5pp": true,
+        "DSR >= 0.95": false
+      },
+      "pass": false
+    },
+    "S3_above_sma50": {
+      "checks": {
+        "full Sharpe >= S1 + 0.10": true,
+        "OOS Sharpe >= S1": true,
+        "MaxDD within 5pp": true,
+        "DSR >= 0.95": false
+      },
+      "pass": false
+    },
+    "S4_sma20_gt_sma100": {
+      "checks": {
+        "full Sharpe >= S1 + 0.10": false,
+        "OOS Sharpe >= S1": false,
+        "MaxDD within 5pp": true,
+        "DSR >= 0.95": false
+      },
+      "pass": false
+    },
+    "S5_donchian20_10": {
+      "checks": {
+        "full Sharpe >= S1 + 0.10": true,
+        "OOS Sharpe >= S1": true,
+        "MaxDD within 5pp": true,
+        "DSR >= 0.95": false
+      },
+      "pass": false
+    }
+  },
+  "U2_monthly_picks": {
+    "2021-02-01": [],
+    "2021-03-01": [],
+    "2021-04-01": [],
+    "2021-05-01": [],
+    "2021-06-01": [],
+    "2021-07-01": [
+      "btc",
+      "doge",
+      "bnb",
+      "eth",
+      "xrp"
+    ],
+    "2021-08-01": [
+      "btc",
+      "eth",
+      "doge",
+      "bnb",
+      "ada"
+    ],
+    "2021-09-01": [
+      "eth",
+      "btc",
+      "ada",
+      "doge",
+      "xrp"
+    ],
+    "2021-10-01": [
+      "ada",
+      "btc",
+      "eth",
+      "xrp",
+      "doge"
+    ],
+    "2021-11-01": [
+      "btc",
+      "eth",
+      "doge",
+      "bnb",
+      "xrp"
+    ],
+    "2021-12-01": [
+      "sand",
+      "btc",
+      "eth",
+      "bnb",
+      "doge"
+    ],
+    "2022-01-01": [
+      "btc",
+      "eth",
+      "sand",
+      "doge",
+      "xrp"
+    ],
+    "2022-02-01": [
+      "btc",
+      "eth",
+      "doge",
+      "ada",
+      "sand"
+    ],
+    "2022-03-01": [
+      "btc",
+      "eth",
+      "doge",
+      "ada",
+      "sand"
+    ],
+    "2022-04-01": [
+      "btc",
+      "eth",
+      "bnb",
+      "ada",
+      "doge"
+    ],
+    "2022-05-01": [
+      "btc",
+      "eth",
+      "doge",
+      "xrp",
+      "bnb"
+    ],
+    "2022-06-01": [
+      "btc",
+      "eth",
+      "doge",
+      "ada",
+      "bnb"
+    ],
+    "2022-07-01": [
+      "btc",
+      "eth",
+      "ada",
+      "doge",
+      "bnb"
+    ],
+    "2022-08-01": [
+      "eth",
+      "btc",
+      "ada",
+      "doge",
+      "xrp"
+    ],
+    "2022-09-01": [
+      "eth",
+      "btc",
+      "doge",
+      "xrp",
+      "ada"
+    ],
+    "2022-10-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "doge",
+      "ada"
+    ],
+    "2022-11-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "doge",
+      "ada"
+    ],
+    "2022-12-01": [
+      "doge",
+      "btc",
+      "eth",
+      "xrp",
+      "bnb"
+    ],
+    "2023-01-01": [
+      "btc",
+      "doge",
+      "eth",
+      "xrp",
+      "bnb"
+    ],
+    "2023-02-01": [
+      "btc",
+      "eth",
+      "doge",
+      "xrp",
+      "sol"
+    ],
+    "2023-03-01": [
+      "btc",
+      "eth",
+      "doge",
+      "xrp",
+      "ada"
+    ],
+    "2023-04-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "doge",
+      "bnb"
+    ],
+    "2023-05-01": [
+      "btc",
+      "doge",
+      "eth",
+      "xrp",
+      "ada"
+    ],
+    "2023-06-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "doge",
+      "bnb"
+    ],
+    "2023-07-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "bnb",
+      "doge"
+    ],
+    "2023-08-01": [
+      "btc",
+      "xrp",
+      "eth",
+      "doge",
+      "trx"
+    ],
+    "2023-09-01": [
+      "btc",
+      "xrp",
+      "eth",
+      "doge",
+      "trx"
+    ],
+    "2023-10-01": [
+      "btc",
+      "xrp",
+      "eth",
+      "doge",
+      "trx"
+    ],
+    "2023-11-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "doge",
+      "trx"
+    ],
+    "2023-12-01": [
+      "btc",
+      "eth",
+      "sol",
+      "xrp",
+      "doge"
+    ],
+    "2024-01-01": [
+      "btc",
+      "sol",
+      "eth",
+      "xrp",
+      "ada"
+    ],
+    "2024-02-01": [
+      "btc",
+      "sol",
+      "eth",
+      "xrp",
+      "ada"
+    ],
+    "2024-03-01": [
+      "btc",
+      "eth",
+      "sol",
+      "xrp",
+      "ada"
+    ],
+    "2024-04-01": [
+      "btc",
+      "doge",
+      "eth",
+      "xrp",
+      "sol"
+    ],
+    "2024-05-01": [
+      "btc",
+      "doge",
+      "eth",
+      "xrp",
+      "sol"
+    ],
+    "2024-06-01": [
+      "btc",
+      "eth",
+      "doge",
+      "sol",
+      "xrp"
+    ],
+    "2024-07-01": [
+      "btc",
+      "eth",
+      "sol",
+      "doge",
+      "xrp"
+    ],
+    "2024-08-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "sol",
+      "doge"
+    ],
+    "2024-09-01": [
+      "btc",
+      "eth",
+      "sol",
+      "xrp",
+      "doge"
+    ],
+    "2024-10-01": [
+      "btc",
+      "eth",
+      "sol",
+      "xrp",
+      "doge"
+    ],
+    "2024-11-01": [
+      "btc",
+      "eth",
+      "sol",
+      "doge",
+      "xrp"
+    ],
+    "2024-12-01": [
+      "btc",
+      "doge",
+      "xrp",
+      "eth",
+      "sol"
+    ],
+    "2025-01-01": [
+      "xrp",
+      "btc",
+      "eth",
+      "doge",
+      "sol"
+    ],
+    "2025-02-01": [
+      "btc",
+      "xrp",
+      "doge",
+      "eth",
+      "sol"
+    ],
+    "2025-03-01": [
+      "btc",
+      "xrp",
+      "eth",
+      "sol",
+      "doge"
+    ],
+    "2025-04-01": [
+      "btc",
+      "xrp",
+      "eth",
+      "sol",
+      "doge"
+    ],
+    "2025-05-01": [
+      "btc",
+      "xrp",
+      "eth",
+      "sol",
+      "doge"
+    ],
+    "2025-06-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "sol",
+      "doge"
+    ],
+    "2025-07-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "sol",
+      "doge"
+    ],
+    "2025-08-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "sol",
+      "doge"
+    ],
+    "2025-09-01": [
+      "eth",
+      "btc",
+      "xrp",
+      "sol",
+      "doge"
+    ],
+    "2025-10-01": [
+      "btc",
+      "eth",
+      "sol",
+      "xrp",
+      "doge"
+    ],
+    "2025-11-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "sol",
+      "doge"
+    ],
+    "2025-12-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "sol",
+      "doge"
+    ],
+    "2026-01-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "sol",
+      "doge"
+    ],
+    "2026-02-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "sol",
+      "doge"
+    ],
+    "2026-03-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "sol",
+      "doge"
+    ],
+    "2026-04-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "sol",
+      "doge"
+    ],
+    "2026-05-01": [
+      "btc",
+      "eth",
+      "sol",
+      "xrp",
+      "doge"
+    ],
+    "2026-06-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "sol",
+      "hype"
+    ],
+    "2026-07-01": [
+      "btc",
+      "hype",
+      "eth",
+      "xrp",
+      "sol"
+    ],
+    "2026-08-01": [
+      "btc",
+      "hype",
+      "eth",
+      "sol",
+      "xrp"
+    ],
+    "2026-09-01": [
+      "btc",
+      "hype",
+      "eth",
+      "xrp",
+      "sol"
+    ],
+    "2026-10-01": [
+      "btc",
+      "xrp",
+      "eth",
+      "hype",
+      "sol"
+    ],
+    "2026-11-01": [
+      "btc",
+      "eth",
+      "sol",
+      "xrp",
+      "hype"
+    ]
+  },
+  "U3_monthly_picks": {
+    "2021-02-01": [],
+    "2021-03-01": [],
+    "2021-04-01": [],
+    "2021-05-01": [],
+    "2021-06-01": [],
+    "2021-07-01": [
+      "btc",
+      "doge",
+      "bnb",
+      "eth",
+      "xrp"
+    ],
+    "2021-08-01": [
+      "btc",
+      "eth",
+      "doge",
+      "bnb",
+      "ada"
+    ],
+    "2021-09-01": [
+      "eth",
+      "btc",
+      "ada",
+      "doge",
+      "xrp"
+    ],
+    "2021-10-01": [
+      "ada",
+      "btc",
+      "eth",
+      "xrp",
+      "doge"
+    ],
+    "2021-11-01": [
+      "btc",
+      "eth",
+      "doge",
+      "bnb",
+      "xrp"
+    ],
+    "2021-12-01": [
+      "sand",
+      "btc",
+      "eth",
+      "bnb",
+      "doge"
+    ],
+    "2022-01-01": [
+      "btc",
+      "eth",
+      "sand",
+      "doge",
+      "xrp"
+    ],
+    "2022-02-01": [
+      "btc",
+      "eth",
+      "doge",
+      "ada",
+      "sand"
+    ],
+    "2022-03-01": [
+      "btc",
+      "eth",
+      "doge",
+      "ada",
+      "sand"
+    ],
+    "2022-04-01": [
+      "btc",
+      "eth",
+      "bnb",
+      "ada",
+      "doge"
+    ],
+    "2022-05-01": [
+      "btc",
+      "eth",
+      "doge",
+      "xrp",
+      "bnb"
+    ],
+    "2022-06-01": [
+      "btc",
+      "eth",
+      "doge",
+      "ada",
+      "bnb"
+    ],
+    "2022-07-01": [
+      "btc",
+      "eth",
+      "ada",
+      "doge",
+      "bnb"
+    ],
+    "2022-08-01": [
+      "eth",
+      "btc",
+      "ada",
+      "doge",
+      "xrp"
+    ],
+    "2022-09-01": [
+      "eth",
+      "btc",
+      "doge",
+      "xrp",
+      "ada"
+    ],
+    "2022-10-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "doge",
+      "ada"
+    ],
+    "2022-11-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "doge",
+      "ada"
+    ],
+    "2022-12-01": [
+      "doge",
+      "btc",
+      "eth",
+      "xrp",
+      "bnb"
+    ],
+    "2023-01-01": [
+      "btc",
+      "doge",
+      "eth",
+      "xrp",
+      "bnb"
+    ],
+    "2023-02-01": [
+      "btc",
+      "eth",
+      "doge",
+      "xrp",
+      "sol"
+    ],
+    "2023-03-01": [
+      "btc",
+      "eth",
+      "doge",
+      "xrp",
+      "ada"
+    ],
+    "2023-04-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "doge",
+      "bnb"
+    ],
+    "2023-05-01": [
+      "btc",
+      "doge",
+      "eth",
+      "xrp",
+      "ada"
+    ],
+    "2023-06-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "doge",
+      "bnb"
+    ],
+    "2023-07-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "bnb",
+      "doge"
+    ],
+    "2023-08-01": [
+      "btc",
+      "xrp",
+      "eth",
+      "doge",
+      "trx"
+    ],
+    "2023-09-01": [
+      "btc",
+      "xrp",
+      "eth",
+      "doge",
+      "trx"
+    ],
+    "2023-10-01": [
+      "btc",
+      "xrp",
+      "eth",
+      "doge",
+      "trx"
+    ],
+    "2023-11-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "doge",
+      "trx"
+    ],
+    "2023-12-01": [
+      "btc",
+      "eth",
+      "sol",
+      "xrp",
+      "doge"
+    ],
+    "2024-01-01": [
+      "btc",
+      "sol",
+      "eth",
+      "xrp",
+      "ada"
+    ],
+    "2024-02-01": [
+      "btc",
+      "sol",
+      "eth",
+      "xrp",
+      "ada"
+    ],
+    "2024-03-01": [
+      "btc",
+      "eth",
+      "sol",
+      "xrp",
+      "ada"
+    ],
+    "2024-04-01": [
+      "btc",
+      "doge",
+      "eth",
+      "xrp",
+      "sol"
+    ],
+    "2024-05-01": [
+      "btc",
+      "doge",
+      "eth",
+      "xrp",
+      "sol"
+    ],
+    "2024-06-01": [
+      "btc",
+      "eth",
+      "doge",
+      "sol",
+      "xrp"
+    ],
+    "2024-07-01": [
+      "btc",
+      "eth",
+      "sol",
+      "doge",
+      "xrp"
+    ],
+    "2024-08-01": [
+      "btc",
+      "pepe",
+      "eth",
+      "xrp",
+      "sol"
+    ],
+    "2024-09-01": [
+      "btc",
+      "pepe",
+      "eth",
+      "sol",
+      "xrp"
+    ],
+    "2024-10-01": [
+      "btc",
+      "pepe",
+      "eth",
+      "sol",
+      "xrp"
+    ],
+    "2024-11-01": [
+      "btc",
+      "pepe",
+      "eth",
+      "sol",
+      "doge"
+    ],
+    "2024-12-01": [
+      "btc",
+      "doge",
+      "pepe",
+      "xrp",
+      "eth"
+    ],
+    "2025-01-01": [
+      "xrp",
+      "btc",
+      "pepe",
+      "eth",
+      "doge"
+    ],
+    "2025-02-01": [
+      "btc",
+      "xrp",
+      "pepe",
+      "doge",
+      "eth"
+    ],
+    "2025-03-01": [
+      "btc",
+      "xrp",
+      "eth",
+      "sol",
+      "pepe"
+    ],
+    "2025-04-01": [
+      "btc",
+      "xrp",
+      "eth",
+      "pepe",
+      "sol"
+    ],
+    "2025-05-01": [
+      "btc",
+      "xrp",
+      "eth",
+      "sol",
+      "pepe"
+    ],
+    "2025-06-01": [
+      "btc",
+      "moodeng",
+      "eth",
+      "pepe",
+      "xrp"
+    ],
+    "2025-07-01": [
+      "btc",
+      "eth",
+      "fartcoin",
+      "xrp",
+      "pepe"
+    ],
+    "2025-08-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "fartcoin",
+      "sol"
+    ],
+    "2025-09-01": [
+      "eth",
+      "btc",
+      "xrp",
+      "sol",
+      "fartcoin"
+    ],
+    "2025-10-01": [
+      "btc",
+      "eth",
+      "sol",
+      "xrp",
+      "doge"
+    ],
+    "2025-11-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "sol",
+      "fartcoin"
+    ],
+    "2025-12-01": [
+      "btc",
+      "eth",
+      "xrp",
+      "fartcoin",
+      "sol"
+    ],
+    "2026-01-01": [
+      "btc",
+      "eth",
+      "fartcoin",
+      "xrp",
+      "sol"
+    ],
+    "2026-02-01": [
+      "btc",
+      "eth",
+      "fartcoin",
+      "xrp",
+      "sol"
+    ],
+    "2026-03-01": [
+      "btc",
+      "pippin",
+      "eth",
+      "xrp",
+      "fartcoin"
+    ],
+    "2026-04-01": [
+      "pippin",
+      "btc",
+      "eth",
+      "fartcoin",
+      "jellyjelly"
+    ],
+    "2026-05-01": [
+      "btc",
+      "pippin",
+      "eth",
+      "sol",
+      "fartcoin"
+    ],
+    "2026-06-01": [
+      "btc",
+      "eth",
+      "pippin",
+      "zerebro",
+      "xrp"
+    ],
+    "2026-07-01": [
+      "btc",
+      "hype",
+      "eth",
+      "xrp",
+      "sol"
+    ],
+    "2026-08-01": [
+      "btc",
+      "hype",
+      "eth",
+      "sol",
+      "fartcoin"
+    ],
+    "2026-09-01": [
+      "btc",
+      "hype",
+      "eth",
+      "xrp",
+      "sol"
+    ],
+    "2026-10-01": [
+      "btc",
+      "xrp",
+      "eth",
+      "hype",
+      "sol"
+    ],
+    "2026-11-01": [
+      "btc",
+      "eth",
+      "sol",
+      "xrp",
+      "fartcoin"
+    ]
+  },
+  "meme_facts": {
+    "bome": {
+      "listed_since": "2024-03-28",
+      "days": 969,
+      "return_since_listing": -0.966,
+      "drawdown_from_peak_now": -0.971,
+      "ann_vol": 1.54,
+      "median_daily_volume_idr_last30": 253000000.0,
+      "spread_now": 0.1111,
+      "tradable": false
+    },
+    "bonk": {
+      "listed_since": "2025-10-21",
+      "days": 397,
+      "return_since_listing": -0.849,
+      "drawdown_from_peak_now": -0.852,
+      "ann_vol": 0.97,
+      "median_daily_volume_idr_last30": 31000000.0,
+      "spread_now": 0.01,
+      "tradable": true
+    },
+    "brett": {
+      "listed_since": "2024-07-11",
+      "days": 864,
+      "return_since_listing": -0.967,
+      "drawdown_from_peak_now": -0.983,
+      "ann_vol": 1.36,
+      "median_daily_volume_idr_last30": 13000000.0,
+      "spread_now": 0.0339,
+      "tradable": false
+    },
+    "cat": {
+      "listed_since": "2024-10-10",
+      "days": 773,
+      "return_since_listing": -0.933,
+      "drawdown_from_peak_now": -0.975,
+      "ann_vol": 1.45,
+      "median_daily_volume_idr_last30": 6000000.0,
+      "spread_now": 0.06,
+      "tradable": false
+    },
+    "cheems": {
+      "listed_since": "2025-05-01",
+      "days": 570,
+      "return_since_listing": -0.807,
+      "drawdown_from_peak_now": -0.861,
+      "ann_vol": 1.2,
+      "median_daily_volume_idr_last30": 3000000.0,
+      "spread_now": 0.1491,
+      "tradable": false
+    },
+    "chillguy": {
+      "listed_since": "2024-12-04",
+      "days": 718,
+      "return_since_listing": -0.983,
+      "drawdown_from_peak_now": -0.983,
+      "ann_vol": 1.52,
+      "median_daily_volume_idr_last30": 18000000.0,
+      "spread_now": 0.0157,
+      "tradable": true
+    },
+    "degen": {
+      "listed_since": "2024-05-02",
+      "days": 934,
+      "return_since_listing": -0.957,
+      "drawdown_from_peak_now": -0.969,
+      "ann_vol": 1.65,
+      "median_daily_volume_idr_last30": 16000000.0,
+      "spread_now": 0.0714,
+      "tradable": false
+    },
+    "dogs": {
+      "listed_since": "2024-08-26",
+      "days": 818,
+      "return_since_listing": -0.974,
+      "drawdown_from_peak_now": -0.981,
+      "ann_vol": 1.27,
+      "median_daily_volume_idr_last30": 8000000.0,
+      "spread_now": 0.0109,
+      "tradable": true
+    },
+    "fartcoin": {
+      "listed_since": "2024-12-12",
+      "days": 710,
+      "return_since_listing": -0.85,
+      "drawdown_from_peak_now": -0.96,
+      "ann_vol": 1.71,
+      "median_daily_volume_idr_last30": 4084000000.0,
+      "spread_now": 0.0049,
+      "tradable": true
+    },
+    "floki": {
+      "listed_since": "2024-06-27",
+      "days": 878,
+      "return_since_listing": -0.904,
+      "drawdown_from_peak_now": -0.932,
+      "ann_vol": 1.08,
+      "median_daily_volume_idr_last30": 19000000.0,
+      "spread_now": 0.0673,
+      "tradable": false
+    },
+    "giga": {
+      "listed_since": "2024-11-21",
+      "days": 731,
+      "return_since_listing": -0.962,
+      "drawdown_from_peak_now": -0.981,
+      "ann_vol": 1.52,
+      "median_daily_volume_idr_last30": 9000000.0,
+      "spread_now": 0.037,
+      "tradable": false
+    },
+    "goat": {
+      "listed_since": "2024-11-21",
+      "days": 731,
+      "return_since_listing": -0.988,
+      "drawdown_from_peak_now": -0.988,
+      "ann_vol": 1.36,
+      "median_daily_volume_idr_last30": 7000000.0,
+      "spread_now": 0.0155,
+      "tradable": true
+    },
+    "griffain": {
+      "listed_since": "2025-07-16",
+      "days": 494,
+      "return_since_listing": -0.809,
+      "drawdown_from_peak_now": -0.828,
+      "ann_vol": 1.5,
+      "median_daily_volume_idr_last30": 3000000.0,
+      "spread_now": 0.0734,
+      "tradable": false
+    },
+    "jellyjelly": {
+      "listed_since": "2025-07-09",
+      "days": 501,
+      "return_since_listing": 1.052,
+      "drawdown_from_peak_now": -0.858,
+      "ann_vol": 2.22,
+      "median_daily_volume_idr_last30": 109000000.0,
+      "spread_now": 0.0136,
+      "tradable": true
+    },
+    "meme": {
+      "listed_since": "2023-11-23",
+      "days": 1095,
+      "return_since_listing": -0.989,
+      "drawdown_from_peak_now": -0.994,
+      "ann_vol": 1.39,
+      "median_daily_volume_idr_last30": 14000000.0,
+      "spread_now": 0.1667,
+      "tradable": false
+    },
+    "mew": {
+      "listed_since": "2024-07-25",
+      "days": 850,
+      "return_since_listing": -0.957,
+      "drawdown_from_peak_now": -0.973,
+      "ann_vol": 1.18,
+      "median_daily_volume_idr_last30": 4000000.0,
+      "spread_now": 0.03,
+      "tradable": false
+    },
+    "mog": {
+      "listed_since": "2024-08-01",
+      "days": 843,
+      "return_since_listing": -0.949,
+      "drawdown_from_peak_now": -0.976,
+      "ann_vol": 1.34,
+      "median_daily_volume_idr_last30": 43000000.0,
+      "spread_now": 0.0102,
+      "tradable": true
+    },
+    "moodeng": {
+      "listed_since": "2024-10-17",
+      "days": 766,
+      "return_since_listing": -0.839,
+      "drawdown_from_peak_now": -0.954,
+      "ann_vol": 1.8,
+      "median_daily_volume_idr_last30": 114000000.0,
+      "spread_now": 0.0108,
+      "tradable": true
+    },
+    "myro": {
+      "listed_since": "2024-09-05",
+      "days": 808,
+      "return_since_listing": -0.983,
+      "drawdown_from_peak_now": -0.993,
+      "ann_vol": 1.71,
+      "median_daily_volume_idr_last30": 8000000.0,
+      "spread_now": 0.0526,
+      "tradable": false
+    },
+    "pengu": {
+      "listed_since": "2025-05-01",
+      "days": 570,
+      "return_since_listing": -0.563,
+      "drawdown_from_peak_now": -0.888,
+      "ann_vol": 1.14,
+      "median_daily_volume_idr_last30": 681000000.0,
+      "spread_now": 0.0072,
+      "tradable": true
+    },
+    "pepe": {
+      "listed_since": "2024-01-30",
+      "days": 1027,
+      "return_since_listing": 2.777,
+      "drawdown_from_peak_now": -0.852,
+      "ann_vol": 1.2,
+      "median_daily_volume_idr_last30": 5004000000.0,
+      "spread_now": 0.0005,
+      "tradable": true
+    },
+    "pippin": {
+      "listed_since": "2025-08-06",
+      "days": 473,
+      "return_since_listing": 0.15,
+      "drawdown_from_peak_now": -0.977,
+      "ann_vol": 2.63,
+      "median_daily_volume_idr_last30": 1178000000.0,
+      "spread_now": 0.0022,
+      "tradable": true
+    },
+    "pnut": {
+      "listed_since": "2024-11-20",
+      "days": 732,
+      "return_since_listing": -0.979,
+      "drawdown_from_peak_now": -0.98,
+      "ann_vol": 1.39,
+      "median_daily_volume_idr_last30": 3000000.0,
+      "spread_now": 0.0382,
+      "tradable": false
+    },
+    "ponke": {
+      "listed_since": "2024-10-17",
+      "days": 766,
+      "return_since_listing": -0.971,
+      "drawdown_from_peak_now": -0.979,
+      "ann_vol": 1.47,
+      "median_daily_volume_idr_last30": 2000000.0,
+      "spread_now": 0.0806,
+      "tradable": false
+    },
+    "popcat": {
+      "listed_since": "2024-08-01",
+      "days": 843,
+      "return_since_listing": -0.962,
+      "drawdown_from_peak_now": -0.985,
+      "ann_vol": 1.38,
+      "median_daily_volume_idr_last30": 6000000.0,
+      "spread_now": 0.0088,
+      "tradable": true
+    },
+    "shib": {
+      "listed_since": "2024-01-30",
+      "days": 1027,
+      "return_since_listing": -0.546,
+      "drawdown_from_peak_now": -0.883,
+      "ann_vol": 0.85,
+      "median_daily_volume_idr_last30": 291000000.0,
+      "spread_now": 0.0023,
+      "tradable": true
+    },
+    "spx": {
+      "listed_since": "2024-11-21",
+      "days": 731,
+      "return_since_listing": -0.489,
+      "drawdown_from_peak_now": -0.855,
+      "ann_vol": 1.48,
+      "median_daily_volume_idr_last30": 101000000.0,
+      "spread_now": 0.0052,
+      "tradable": true
+    },
+    "sundog": {
+      "listed_since": "2025-02-04",
+      "days": 656,
+      "return_since_listing": -0.976,
+      "drawdown_from_peak_now": -0.991,
+      "ann_vol": 1.42,
+      "median_daily_volume_idr_last30": 24000000.0,
+      "spread_now": 0.0714,
+      "tradable": false
+    },
+    "toshi": {
+      "listed_since": "2025-06-18",
+      "days": 522,
+      "return_since_listing": -0.827,
+      "drawdown_from_peak_now": -0.922,
+      "ann_vol": 1.27,
+      "median_daily_volume_idr_last30": 9000000.0,
+      "spread_now": 0.0151,
+      "tradable": true
+    },
+    "trump": {
+      "listed_since": "2025-05-01",
+      "days": 570,
+      "return_since_listing": -0.922,
+      "drawdown_from_peak_now": -0.933,
+      "ann_vol": 0.9,
+      "median_daily_volume_idr_last30": 66000000.0,
+      "spread_now": 0.0081,
+      "tradable": true
+    },
+    "turbo": {
+      "listed_since": "2024-07-04",
+      "days": 871,
+      "return_since_listing": -0.84,
+      "drawdown_from_peak_now": -0.954,
+      "ann_vol": 1.36,
+      "median_daily_volume_idr_last30": 9000000.0,
+      "spread_now": 0.0376,
+      "tradable": false
+    },
+    "useless": {
+      "listed_since": "2025-08-27",
+      "days": 452,
+      "return_since_listing": -0.615,
+      "drawdown_from_peak_now": -0.787,
+      "ann_vol": 1.92,
+      "median_daily_volume_idr_last30": 82000000.0,
+      "spread_now": 0.0087,
+      "tradable": true
+    },
+    "vine": {
+      "listed_since": "2025-08-27",
+      "days": 452,
+      "return_since_listing": -0.854,
+      "drawdown_from_peak_now": -0.875,
+      "ann_vol": 1.92,
+      "median_daily_volume_idr_last30": 33000000.0,
+      "spread_now": 0.0181,
+      "tradable": true
+    },
+    "wif": {
+      "listed_since": "2024-04-04",
+      "days": 962,
+      "return_since_listing": -0.962,
+      "drawdown_from_peak_now": -0.968,
+      "ann_vol": 1.23,
+      "median_daily_volume_idr_last30": 15000000.0,
+      "spread_now": 0.0059,
+      "tradable": true
+    },
+    "zerebro": {
+      "listed_since": "2025-02-03",
+      "days": 657,
+      "return_since_listing": -0.516,
+      "drawdown_from_peak_now": -0.71,
+      "ann_vol": 2.09,
+      "median_daily_volume_idr_last30": 480000000.0,
+      "spread_now": 0.0079,
+      "tradable": true
+    }
+  }
+}
