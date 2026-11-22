@@ -55,6 +55,7 @@ if not 0.0 <= ML_WEIGHT <= 1.0:
 MAX_SPREAD = 0.01
 BUY_BUFFER = 0.995
 ALLOWED_METHODS = {"getInfo", "trade"}
+RECORD: dict = {}  # machine-readable summary, printed as one "RESULT_JSON {...}" line at the end
 
 
 # ---------------------------------------------------------------- HTTP
@@ -181,6 +182,7 @@ def send(order: dict, key: str, secret: str, live: bool, day: str) -> None:
     log(f"- {order['type'].upper()} {coin.upper()}: `{order}`")
     if live:
         res = private("trade", key, secret, pair=f"{coin}_idr", **order)
+        RECORD.setdefault("orders_sent", []).append({"coin": coin, **order, "response": res})
         log(f"  → sent, Indodax response: `{res}`")
 
 
@@ -191,6 +193,9 @@ def blend(a: dict[str, float], b: dict[str, float], wb: float) -> dict[str, floa
 
 def fmt_weights(t: dict[str, float]) -> str:
     return ", ".join(f"{c.upper()} {t.get(c, 0.0):.0%}" for c in COINS) + f" | rupiah {1 - sum(t.values()):.0%}"
+
+
+ML_DETAIL: dict = {}
 
 
 def ml_part(coins: list[str]) -> tuple[dict[str, float] | None, str]:
@@ -204,6 +209,8 @@ def ml_part(coins: list[str]) -> tuple[dict[str, float] | None, str]:
     except Exception as e:
         return None, f"ML signal unavailable: {type(e).__name__}: {e}"
     d = r["detail"]
+    ML_DETAIL.update(decision_bar=str(d["decision_bar"]),
+                     prob={k: float(v) for k, v in d["prob"].items()}, on={k: bool(v) for k, v in d["on"].items()})
     rows = [f"ML decision bar {d['decision_bar']:%Y-%m-%d %H:%M} UTC (Binance 4h data)",
             "", "| Coin | P(up) | ML says | ML weight |", "|---|---|---|---|"]
     for s in sorted(d["prob"]):
@@ -230,6 +237,8 @@ def main() -> int:
     now = int(time.time())
     day = datetime.now(timezone.utc).strftime("%Y%m%d")
     log(f"### Run {datetime.now(timezone.utc):%Y-%m-%d %H:%M} UTC — mode: {'LIVE' if live else 'DRY RUN'}")
+    RECORD.update(time=datetime.now(timezone.utc).isoformat(timespec="seconds"), live=live,
+                  ml_weight=ML_WEIGHT, coins={}, orders_sent=[])
 
     pairs = {p["id"]: p for p in public("/api/pairs")}
     tickers = public("/api/summaries")["tickers"]
@@ -259,6 +268,9 @@ def main() -> int:
         except RuntimeError as e:
             problem, r, v = problem or str(e), float("nan"), float("nan")
         rows.append(f"| {c.upper()} | {bid:,.0f} | {r:+.1%} | {v:.0%} | {problem or 'ok'} |")
+        RECORD["coins"][c] = {"bid": bid, "ask": ask, "ret21": r, "vol": v, "status": problem or "ok",
+                              "min_idr": float(p["trade_min_base_currency"]),
+                              "min_coin": float(p["trade_min_traded_currency"])}
         if problem:
             continue  # leave this coin untouched today
         signals[c], bids[c] = (r, v), bid
@@ -269,6 +281,8 @@ def main() -> int:
     log("TSMOM target: " + fmt_weights(tsmom))
 
     ml, ml_log = ml_part(list(bids))
+    RECORD.update(tsmom_target=tsmom, ml_target=ml, ml_detail=ML_DETAIL or None,
+                  ml_error=None if ml is not None else ml_log)
     log(f"#### ML sleeve — {'SHADOW (not traded)' if ML_WEIGHT == 0 else f'LIVE, weight {ML_WEIGHT:.0%}'}")
     log(ml_log)
     if ml is None and ML_WEIGHT > 0:
@@ -278,6 +292,7 @@ def main() -> int:
         log("ML target: " + fmt_weights(ml))
     targets = blend(tsmom, ml, ML_WEIGHT) if (ml is not None and ML_WEIGHT > 0) else tsmom
     log("**Trading target:** " + fmt_weights(targets))
+    RECORD["trading_target"] = targets
 
     if not key or not secret:
         log("No API key set — signals only.")
@@ -287,12 +302,15 @@ def main() -> int:
     equity = idr_free + sum(float(holdings[c]) * bids[c] for c in bids)
     held = ", ".join(f"{float(holdings[c]):.8g} {c.upper()}" for c in COINS if holdings[c] > 0) or "no coins"
     log(f"Equity managed by bot ≈ Rp{equity:,.0f} (free rupiah Rp{idr_free:,.0f} + {held})")
+    RECORD.update(equity=equity, idr_free=idr_free, holdings={c: str(q) for c, q in holdings.items() if q > 0})
 
     if ml is not None and ML_WEIGHT == 0:
         for name, t in (("ML alone", ml), ("50:50 TSMOM+ML", blend(tsmom, ml, 0.5))):
             s_, b_ = plan_orders(t, holdings, bids, idr_free, mins)
             freed = sum(float(o[o["coin"]]) * bids[o["coin"]] for o in s_)
-            log(f"Shadow — {name} would place: {describe(s_ + size_buys(b_, idr_free + freed), bids)}")
+            would = s_ + size_buys(b_, idr_free + freed)
+            RECORD.setdefault("shadow_orders", {})[name] = would
+            log(f"Shadow — {name} would place: {describe(would, bids)}")
 
     sells, buys = plan_orders(targets, holdings, bids, idr_free, mins)
     if not sells and not buys:
@@ -319,9 +337,17 @@ def main() -> int:
     return 0
 
 
+def print_record(code: int, error: str | None = None) -> None:
+    RECORD.update(exit_code=code, error=error)
+    print("RESULT_JSON " + json.dumps(RECORD, default=str, sort_keys=True), flush=True)
+
+
 if __name__ == "__main__":
     try:
-        sys.exit(main())
+        rc = main()
+        print_record(rc)
+        sys.exit(rc)
     except Exception as e:  # fail loudly so GitHub emails you
         log(f"ERROR: {type(e).__name__}: {e}")
+        print_record(1, f"{type(e).__name__}: {e}")
         sys.exit(1)
