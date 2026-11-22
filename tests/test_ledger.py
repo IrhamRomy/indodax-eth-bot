@@ -33,5 +33,32 @@ class TestLedger(unittest.TestCase):
         self.assertEqual((pf["units"], fee), ({"btc": 0.0001}, 0.0))
 
 
+class TestLedgerMain(unittest.TestCase):
+    def test_new_lines_and_csv_columns(self):
+        import tempfile
+        from pathlib import Path
+        from unittest import mock
+        rec = {**REC, "equity": 100000, "tsmom_target": {"btc": 0.0, "eth": 0.0},
+               "ml_target": {"btc": 0.1, "eth": 0.0},
+               "alt_targets": {"SMA50": {"btc": 0.2, "eth": 0.0}, "DONCHIAN_20_10": {"btc": 0.0, "eth": 0.1}}}
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            log = d / "run.log"
+            log.write_text("RESULT_JSON " + json.dumps(rec))
+            # an old ledger without the new columns must be extended, not broken
+            (d / "shadow_ledger.csv").write_text("date,run_id,TSMOM_equity\n2026-11-20,1,1000000\n")
+            with mock.patch.object(sl, "REVIEWS", d), mock.patch.object(sl, "STATE", d / "s.json"), \
+                    mock.patch.object(sl, "LEDGER", d / "shadow_ledger.csv"), \
+                    mock.patch.object(sys, "argv", ["x", "--log", str(log), "--run-id", "9", "--run-date", "2026-11-23"]):
+                self.assertEqual(sl.main(), 0)
+            st = json.loads((d / "s.json").read_text())
+            self.assertIn("btc", st["portfolios"]["SMA50"]["units"])
+            self.assertIn("eth", st["portfolios"]["Donchian_20_10"]["units"])
+            self.assertEqual(st["portfolios"]["TSMOM"]["units"], {})
+            rows = (d / "shadow_ledger.csv").read_text().splitlines()
+            self.assertIn("SMA50_equity", rows[0])
+            self.assertEqual(len(rows), 3)
+
+
 if __name__ == "__main__":
     unittest.main()

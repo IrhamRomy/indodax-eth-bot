@@ -175,6 +175,42 @@ class TestMainFlow(unittest.TestCase):
         self.assertTrue(trades[0].count("type=sell"))  # sells go first
 
 
+class TestShadowRules(unittest.TestCase):
+    def test_sma50(self):
+        self.assertTrue(bot.sma50_on([1.0] * 49 + [2.0]))
+        self.assertFalse(bot.sma50_on([2.0] * 49 + [1.0]))
+        with self.assertRaises(RuntimeError):
+            bot.sma50_on([1.0] * 10)
+
+    def test_donchian_enter_and_exit(self):
+        base = [100.0] * 30
+        self.assertTrue(bot.donchian_on(base + [101.0] * 1 + [100.5] * 19))   # breakout, no exit yet
+        self.assertFalse(bot.donchian_on(base + [101.0] + [100.5] * 9 + [99.0] + [100.0] * 9))  # exited
+
+    def test_donchian_matches_study_definition(self):
+        import random
+        rnd = random.Random(7)
+        for _ in range(200):
+            px, p = [], 100.0
+            for _ in range(120):
+                p *= 1 + rnd.gauss(0, 0.04)
+                px.append(p)
+            on = False  # study: hi20/lo10 over PRIOR closes, state = where(state, ~exit, enter)
+            for i in range(20, len(px)):
+                hi, lo = max(px[i - 20:i]), min(px[i - 10:i])
+                on = (px[i] >= lo) if on else (px[i] > hi)
+            self.assertEqual(bot.donchian_on(px), on)
+
+    def test_alt_targets_in_record_and_never_traded(self):
+        up = {c: 0.3 for c in TestMainFlow.PRICES}
+        sent = []
+        fake = TestMainFlow.make_fake_http(up, {"idr": 0}, sent)
+        TestMainFlow._run_with(self, fake, sent, True)
+        self.assertEqual(set(bot.RECORD["alt_targets"]), {"SMA50", "DONCHIAN_20_10"})
+        self.assertGreater(sum(bot.RECORD["alt_targets"]["SMA50"].values()), 0)
+        self.assertEqual([b for b in sent if "method=trade" in b], [])  # no rupiah → no trades at all
+
+
 class TestSafetyGuard(unittest.TestCase):
     def _run(self, trend, balance, **kw):
         sent = []

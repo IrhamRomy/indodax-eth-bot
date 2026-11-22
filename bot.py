@@ -148,6 +148,31 @@ def annual_vol(closes: list[float], days: int = VOL_DAYS) -> float:
     return math.sqrt(sum((x - m) ** 2 for x in r) / (days - 1)) * math.sqrt(365)
 
 
+def sma50_on(closes: list[float]) -> bool:
+    """Shadow rule SMA50: hold while the latest close is above its 50-day simple average."""
+    if len(closes) < 50:
+        raise RuntimeError(f"need 50 daily closes for SMA50, got {len(closes)}")
+    return closes[-1] > sum(closes[-50:]) / 50
+
+
+def donchian_on(closes: list[float], enter_n: int = 20, exit_n: int = 10) -> bool:
+    """Shadow rule Donchian 20/10: enter when the close beats the highest close of the prior 20
+    days, exit when it falls below the lowest close of the prior 10 days. Replayed over the whole
+    window (stateless), starting flat."""
+    if len(closes) < enter_n + 30:
+        raise RuntimeError(f"need {enter_n + 30} daily closes for Donchian, got {len(closes)}")
+    on = False
+    for i in range(enter_n, len(closes)):
+        if on and closes[i] < min(closes[i - exit_n:i]):
+            on = False
+        elif not on and closes[i] > max(closes[i - enter_n:i]):
+            on = True
+    return on
+
+
+ALT_RULES = {"SMA50": sma50_on, "DONCHIAN_20_10": donchian_on}
+
+
 def target_weights(signals: dict[str, tuple[float, float]], target_vol: float = TARGET_VOL,
                    max_weight: float = MAX_WEIGHT) -> dict[str, float]:
     """signals: coin -> (momentum return, annual vol). Returns coin -> target weight."""
@@ -278,7 +303,7 @@ def main() -> int:
     pairs = {p["id"]: p for p in public("/api/pairs")}
     tickers = public("/api/summaries")["tickers"]
 
-    signals, bids, mins = {}, {}, {}
+    signals, bids, mins, alt_signals = {}, {}, {}, {}
     rows = ["| Coin | Price (bid) | 21d return | Vol (yr) | Status |", "|---|---|---|---|---|"]
     for c in COINS:
         p, t = pairs.get(f"{c}idr"), tickers.get(f"{c}_idr")
@@ -288,7 +313,7 @@ def main() -> int:
         bid, ask = float(t["buy"]), float(t["sell"])
         spread = (ask - bid) / ask if ask else 1.0
         candles = public(f"/tradingview/history_v2?symbol={c.upper()}IDR&tf=1D"
-                         f"&from={now - (VOL_DAYS + 30) * 86400}&to={now}")
+                         f"&from={now - 150 * 86400}&to={now}")
         daily = completed_daily_closes(candles, now)
         problem = None
         if p.get("is_maintenance") or p.get("is_market_suspended"):
@@ -314,6 +339,12 @@ def main() -> int:
             continue  # leave this coin untouched today
         # safety guard: a coin whose liquidity dried up is never bought; any holding is sold
         signals[c], bids[c] = ((-1.0 if exit_only else r), v), bid
+        for name, rule in ALT_RULES.items():  # shadow-only rules (logged, never traded)
+            try:
+                on = rule(closes) and not exit_only
+            except RuntimeError:
+                on = False
+            alt_signals.setdefault(name, {})[c] = ((1.0 if on else -1.0), v)
         mins[c] = (float(p["trade_min_base_currency"]), float(p["trade_min_traded_currency"]))
     log("\n".join(rows))
     watch = big_coin_watch(tickers, COINS)
@@ -324,6 +355,10 @@ def main() -> int:
 
     tsmom = target_weights(signals)
     log("TSMOM target: " + fmt_weights(tsmom))
+    alt_targets = {name: target_weights(sig) for name, sig in alt_signals.items()}
+    RECORD["alt_targets"] = alt_targets
+    for name, t in alt_targets.items():
+        log(f"Shadow rule {name} target (not traded): " + fmt_weights(t))
 
     ml, ml_log = ml_part(list(bids))
     RECORD.update(tsmom_target=tsmom, ml_target=ml, ml_detail=ML_DETAIL or None,

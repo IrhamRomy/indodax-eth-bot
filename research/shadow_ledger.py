@@ -1,4 +1,5 @@
-"""Shadow ledger: compares TSMOM, ML alone and a 50:50 blend on the bot's real daily signals.
+"""Shadow ledger: compares TSMOM (live rule), ML alone, a 50:50 blend and the shadow rules SMA50 and
+Donchian 20/10 on the bot's real daily signals.
 
 Used by the nightly Claude check-in. Input is the RESULT_JSON line the bot prints in its
 GitHub Actions log. Three virtual portfolios, each starting with Rp1,000,000 (so Indodax's
@@ -28,7 +29,8 @@ STATE = REVIEWS / "shadow_state.json"
 LEDGER = REVIEWS / "shadow_ledger.csv"
 NOTIONAL = 1_000_000.0
 SELL_COST, BUY_COST = 0.0041, 0.0020
-NAMES = ("TSMOM", "ML_alone", "Blend_50_50")
+NAMES = ("TSMOM", "ML_alone", "Blend_50_50", "SMA50", "Donchian_20_10")
+ALT_KEYS = {"SMA50": "SMA50", "Donchian_20_10": "DONCHIAN_20_10"}  # RESULT_JSON alt_targets names
 
 
 def parse_record(log_text: str) -> dict:
@@ -88,13 +90,19 @@ def main() -> int:
         "start": a.run_date, "notional": NOTIONAL, "processed": {},
         "portfolios": {n: {"idr": NOTIONAL, "units": {}, "peak": NOTIONAL, "fees": 0.0, "traded": 0.0}
                        for n in NAMES}}
+    for n in NAMES:  # portfolios added later start with fresh virtual capital on their first day
+        if n not in state["portfolios"]:
+            state["portfolios"][n] = {"idr": NOTIONAL, "units": {}, "peak": NOTIONAL, "fees": 0.0,
+                                      "traded": 0.0, "start": a.run_date}
     if a.run_date in state["processed"]:
         print(f"Run date {a.run_date} already in the ledger (run {state['processed'][a.run_date]}). Nothing to do.")
         return 0
 
     tsmom, ml = rec.get("tsmom_target"), rec.get("ml_target")
+    alt = rec.get("alt_targets") or {}
     targets = {"TSMOM": tsmom, "ML_alone": ml,
                "Blend_50_50": bot.blend(tsmom, ml, 0.5) if (tsmom is not None and ml is not None) else None}
+    targets.update({n: alt.get(k) for n, k in ALT_KEYS.items()})
     bids = {c: v["bid"] for c, v in rec["coins"].items()}
     out = [f"### Shadow ledger — {a.run_date} (run {a.run_id})", "",
            "| Portfolio | Today | Equity | Since start | Max DD | Invested | Fees paid | Turnover |",
@@ -119,12 +127,13 @@ def main() -> int:
         out.append(f"\nSignal agreement TSMOM vs ML (in/out per coin): {row['agree']:.0%}")
     state["processed"][a.run_date] = a.run_id
     STATE.write_text(json.dumps(state, indent=2, sort_keys=True))
-    new = not LEDGER.exists()
-    with LEDGER.open("a", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=list(row))
-        if new:
-            w.writeheader()
-        w.writerow(row)
+    old_rows = list(csv.DictReader(LEDGER.open())) if LEDGER.exists() else []
+    fields = list(dict.fromkeys([k for r in old_rows for k in r] + list(row)))  # keep order, add new columns
+    with LEDGER.open("w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=fields)
+        w.writeheader()
+        for r in old_rows + [row]:
+            w.writerow(r)
     print("\n".join(out))
     return 0
 

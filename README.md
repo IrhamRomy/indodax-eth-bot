@@ -47,6 +47,14 @@ your real balance — but only TSMOM trades.
   — ideally after re-running `research/universe_memes_study.py` (see research/RESULTS_*.md:
   an automatic top-5-by-volume list and meme coins both tested worse).
 
+## Shadow rules (since 2026-11-23, never traded)
+Two alternative signals that looked better in backtests but are unproven run as shadow lines:
+**SMA50** (hold while close > 50-day average) and **DONCHIAN_20_10** (20-day breakout in, 10-day
+low out). Each run logs their targets and RESULT_JSON `alt_targets`; the nightly check-in follows
+them in `reviews/shadow_ledger.csv` with Rp1M virtual capital and real costs, next to TSMOM,
+ML_alone and Blend_50_50. How they will be judged on 2027-03-23 is fixed in
+research/PREREGISTERED_shadow_rules_verdict.md.
+
 ## How much to deposit
 Indodax's minimum order is Rp10,000. A typical position is 10–18% of the account and a re-size is ~half of that,
 so below ~**Rp500,000** many adjustments are too small to place. Rp1,000,000+ works smoothly.
