@@ -13,7 +13,9 @@ UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) momentum-trader/2.0"}
 
 
 def get(url):
-    with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60) as r:
+    if not url.startswith(("https://indodax.com/", "https://data-api.binance.vision/")):
+        raise ValueError(f"refusing unexpected URL: {url}")
+    with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60) as r:  # nosec B310 (https allow-list above)
         return json.load(r)
 
 
