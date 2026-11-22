@@ -14,7 +14,7 @@ Sanity check: at a flat 0.30% the deployed ML (−0.2%/yr, Sharpe 0.115, turnove
 | B_every_3_days | +13.7% | 0.65 | −43.3% | 28.1× | 8.6% | 0.69 | **pass** |
 | C_strict_wide_band | +0.5% | 0.13 | −41.3% | 34.7× | 10.6% | 0.26 | fail |
 | TSMOM (daily) | +4.6% | 0.30 | −41.5% | 34.8× | 10.6% | – | reference |
-| BTC buy & hold | +7.9%* | | −67% | 0 | 0 | – | reference |
+| BTC buy & hold | +4.7%* | | −67.2% | 0 | 0 | – | reference |
 *BTC: by year −65%, +156%, +122%, −6%, −33%.
 
 By year (Indodax costs): ML_deployed −29%, +9%, +52%, +7%, −22% · B −42%, +49%, +56%, +56%, −11% ·
