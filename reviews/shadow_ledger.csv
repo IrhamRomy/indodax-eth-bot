@@ -1,2 +1,3 @@
 date,run_id,live_equity,live_invested,ml_ok,agree,TSMOM_equity,TSMOM_invested,ML_alone_equity,ML_alone_invested,Blend_50_50_equity,Blend_50_50_invested,SMA50_equity,SMA50_invested,Donchian_20_10_equity,Donchian_20_10_invested
 2026-11-23,45193605507,,0.0,True,0.6,1000000.0,0.0,999396.36,0.1739,999698.18,0.0869,1000000.0,0.0,1000000.0,0.0
+2026-11-24,45417418964,,0.0,True,1.0,1000000.0,0.0,985812.31,0.0,992906.16,0.0,1000000.0,0.0,1000000.0,0.0
